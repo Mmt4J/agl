@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-
 Route::view('/', 'welcome')->name('home');
 
 Route::middleware(['auth'])->group(function () {
@@ -12,7 +11,6 @@ Route::middleware(['auth'])->group(function () {
 // Admin Routes
 // Adjust the middleware to whatever your actual auth/role setup ends up being -
 // 'auth' alone is a placeholder until roles exist.
-
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::livewire('/', 'admin.overview')->name('overview');
@@ -38,12 +36,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {
-        Route::livewire('/business-hours', 'admin.settings.business-hours')->name('business-hours');
-        Route::livewire('/company', 'admin.settings.company')->name('company');
-        Route::livewire('/users', 'admin.settings.users')->name('users');
+        Route::livewire('/business-hours', 'admin.setting.business-hours')->name('business-hours');
+        Route::livewire('/company', 'admin.setting.company')->name('company');
+        Route::livewire('/users', 'admin.setting.users')->name('users');
     });
 });
-
 
 // Website Routes
 Route::livewire('/', 'pages::website.home')->name('website.home');
@@ -56,7 +53,5 @@ Route::livewire('/blog', 'pages::website.blog.index')->name('website.blog');
 Route::livewire('/blog/{post}', 'pages::website.blog.show')->name('website.blog.show');
 Route::livewire('/contact', 'pages::website.contact')->name('website.contact');
 Route::livewire('/quote', 'pages::website.quote')->name('website.quote');
-
-
 
 require __DIR__.'/settings.php';

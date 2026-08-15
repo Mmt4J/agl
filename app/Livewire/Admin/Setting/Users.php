@@ -3,7 +3,11 @@
 namespace App\Livewire\Admin\Setting;
 
 use Livewire\Component;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 
+#[Layout('layouts.admin')]
+#[Title('Users')]
 class Users extends Component
 {
     public function render()
