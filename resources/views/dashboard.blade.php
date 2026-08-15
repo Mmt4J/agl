@@ -1,18 +1,17 @@
-<x-layouts::app :title="__('Dashboard')">
-    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-        </div>
-        <div class="relative h-full flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-            <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-        </div>
+{{--
+    resources/views/dashboard.blade.php
+    ------------------------------------------------------------------
+    Post-login landing page (config/fortify.php 'home' => '/dashboard').
+    Original was Laravel's generic demo placeholder (3 gray boxes with
+    a pattern SVG, x-placeholder-pattern) - meaningless filler content,
+    not something worth reskinning. Replaced with an honest one-line
+    placeholder instead. This whole file gets replaced again once the
+    real admin dashboard (from dashboard.html) exists.
+--}}
+<x-layouts::account :title="__('Dashboard')">
+    <div class="rounded-lg border border-ink-100 dark:border-ink-800 p-10 text-center">
+        <p class="text-ink-600 dark:text-linen-300">
+            {{ __('The admin dashboard lives here once it\'s built.') }}
+        </p>
     </div>
-</x-layouts::app>
+</x-layouts::account>

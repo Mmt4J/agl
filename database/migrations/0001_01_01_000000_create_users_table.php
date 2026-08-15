@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            // admin: full back-office access. editor: content only (services, blog, portfol
+            $table->enum('role', ['admin', 'editor'])->default('editor');
+            
             $table->rememberToken();
             $table->timestamps();
         });

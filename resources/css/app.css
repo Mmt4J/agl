@@ -1,66 +1,103 @@
 @import 'tailwindcss';
-@import '../../vendor/livewire/flux/dist/flux.css';
 
-@source '../views';
+/* Vendor views not auto-scanned by Tailwind's content detection (vendor/ is gitignored) */
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
-@source '../../vendor/livewire/flux/stubs/**/*.blade.php';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    /* ---------- Typography ---------- */
+    --font-display: "Zilla Slab", ui-serif, Georgia, serif;
+    --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Space Mono", ui-monospace, monospace;
 
-    --color-zinc-50: #fafafa;
-    --color-zinc-100: #f5f5f5;
-    --color-zinc-200: #e5e5e5;
-    --color-zinc-300: #d4d4d4;
-    --color-zinc-400: #a3a3a3;
-    --color-zinc-500: #737373;
-    --color-zinc-600: #525252;
-    --color-zinc-700: #404040;
-    --color-zinc-800: #262626;
-    --color-zinc-900: #171717;
-    --color-zinc-950: #0a0a0a;
+    /* ---------- Ink (navy) — primary dark / neutral scale ---------- */
+    --color-ink-950: #0d1526;
+    --color-ink-900: #16213a;
+    --color-ink-800: #202f4d;
+    --color-ink-700: #274870;
+    --color-ink-600: #34608f;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
-    --color-accent-foreground: var(--color-white);
+    /* ---------- Copper — brand accent ---------- */
+    --color-copper-300: #dcb783;
+    --color-copper-400: #c68a4e;
+    --color-copper-500: #a9702b;
+    --color-copper-600: #8c5a1f;
+
+    /* ---------- Sage — success / positive state ---------- */
+    --color-sage-500: #4b6b4e;
+    --color-sage-600: #3b5740;
+
+    /* ---------- Danger — errors / destructive actions ---------- */
+    --color-danger-400: #c17057;
+    --color-danger-500: #a13f2b;
+    --color-danger-600: #832f1f;
+
+    /* ---------- Linen — paper / light neutral scale ---------- */
+    --color-linen-50:  #f6f6ef;
+    --color-linen-100: #eef0e2;
+    --color-linen-200: #e2e4d2;
 }
 
-@layer theme {
-    .dark {
-        --color-accent: var(--color-white);
-        --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-neutral-800);
+/* ============================================================
+   Base typography
+   ============================================================ */
+html { font-family: var(--font-body); }
+.font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); }
+
+/* ============================================================
+   Alpine — hide un-initialized elements until Alpine boots
+   ============================================================ */
+[x-cloak] { display: none !important; }
+
+/* ============================================================
+   Brand text selection
+   ============================================================ */
+::selection { background-color: var(--color-copper-300); color: var(--color-ink-950); }
+
+/* ============================================================
+   Scrollbars (dense admin tables/sidebars read better with these)
+   ============================================================ */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.15); border-radius: 4px; }
+.dark ::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.15); }
+
+/* ============================================================
+   Registry index row — active/pressed state
+   (member directory rows, leadership list, etc.)
+   ============================================================ */
+.entry-row[aria-pressed="true"] {
+    border-left-color: var(--color-copper-500);
+    background-color: rgba(169, 112, 43, 0.08);
+}
+.dark .entry-row[aria-pressed="true"] {
+    background-color: rgba(198, 138, 78, 0.12);
+}
+
+/* ============================================================
+   Guilloché-style dotted ring behind hero/seal graphics,
+   echoing certificate borders
+   ============================================================ */
+.seal-ring {
+    background-image: radial-gradient(circle, currentColor 1px, transparent 1.4px);
+    background-size: 10px 10px;
+}
+
+/* ============================================================
+   Perforated / ledger-tab bottom rule on nav items
+   ============================================================ */
+.tab-underline { box-shadow: inset 0 -2px 0 0 transparent; }
+.tab-underline[aria-current="page"] { box-shadow: inset 0 -2px 0 0 var(--color-copper-500); }
+
+/* ============================================================
+   Reduced motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
     }
 }
-
-@layer base {
-
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        border-color: var(--color-gray-200, currentColor);
-    }
-}
-
-[data-flux-field]:not(ui-radio, ui-checkbox) {
-    @apply grid gap-2;
-}
-
-[data-flux-label] {
-    @apply  !mb-0 !leading-tight;
-}
-
-input:focus[data-flux-control],
-textarea:focus[data-flux-control],
-select:focus[data-flux-control] {
-    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
-}
-
-/* \[:where(&)\]:size-4 {
-    @apply size-4;
-} */
