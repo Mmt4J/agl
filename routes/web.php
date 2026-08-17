@@ -36,9 +36,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {
-        Route::livewire('/business-hours', 'admin.setting.business-hours')->name('business-hours');
-        Route::livewire('/company', 'admin.setting.company')->name('company');
-        Route::livewire('/users', 'admin.setting.users')->name('users');
+        Route::livewire('/business-hours', 'admin.settings.business-hours')->name('business-hours');
+        Route::livewire('/company', 'admin.settings.company')->name('company');
+        Route::livewire('/users', 'admin.settings.users')->name('users')->middleware('admin');
     });
 });
 
