@@ -12,7 +12,7 @@
                     <div class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-2.5">
                         <p class="flex-1 text-sm">{{ $category->name }} <span class="text-ink-900/40 dark:text-linen-100/40">({{ $category->posts_count }})</span></p>
                         <button type="button" wire:click="editCategory({{ $category->id }})" class="text-xs text-copper-600 dark:text-copper-300">Edit</button>
-                        <button type="button" wire:click="confirmDelete('category', {{ $category->id }})" @click="$dispatch('open-modal', { name: 'confirm-delete' })" class="text-danger-500" aria-label="Delete {{ $category->name }}">
+                        <button type="button" wire:click="confirmDelete('category', {{ $category->id }})" class="text-danger-500" aria-label="Delete {{ $category->name }}">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -30,7 +30,7 @@
                     <div class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-2.5">
                         <p class="flex-1 text-sm">{{ $tag->name }}</p>
                         <button type="button" wire:click="editTag({{ $tag->id }})" class="text-xs text-copper-600 dark:text-copper-300">Edit</button>
-                        <button type="button" wire:click="confirmDelete('tag', {{ $tag->id }})" @click="$dispatch('open-modal', { name: 'confirm-delete' })" class="text-danger-500" aria-label="Delete {{ $tag->name }}">
+                        <button type="button" wire:click="confirmDelete('tag', {{ $tag->id }})" class="text-danger-500" aria-label="Delete {{ $tag->name }}">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -69,7 +69,7 @@
                     @endif
 
                     <button type="button" wire:click="editPost({{ $post->id }})" class="text-xs text-copper-600 dark:text-copper-300 shrink-0">Edit</button>
-                    <button type="button" wire:click="confirmDelete('post', {{ $post->id }})" @click="$dispatch('open-modal', { name: 'confirm-delete' })" class="text-danger-500 shrink-0" aria-label="Delete {{ $post->title }}">
+                    <button type="button" wire:click="confirmDelete('post', {{ $post->id }})" class="text-danger-500 shrink-0" aria-label="Delete {{ $post->title }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -104,60 +104,64 @@
 
     {{-- Post editor - the big one --}}
     <x-forms.modal name="post-form">
-        <form wire:submit="savePost" class="space-y-6 max-h-[75vh] overflow-y-auto pr-1">
-            <h2 class="font-display text-lg font-semibold">{{ $postId ? 'Edit post' : 'Write post' }}</h2>
+        <form wire:submit="savePost" class="space-y-6">
+            <div class="max-h-[65vh] overflow-y-auto pr-1 space-y-6">
+                <h2 class="font-display text-lg font-semibold">{{ $postId ? 'Edit post' : 'Write post' }}</h2>
 
-            <x-forms.input wire:model="title" name="title" label="Title" type="text" required autofocus />
-            <x-forms.input wire:model="slug" name="slug" label="Slug (leave blank to auto-generate)" type="text" />
-            <x-forms.input wire:model="excerpt" name="excerpt" label="Excerpt (shown on the blog listing)" type="text" required />
+                <x-forms.input wire:model="title" name="title" label="Title" type="text" required autofocus />
+                <x-forms.input wire:model="slug" name="slug" label="Slug (leave blank to auto-generate)" type="text" />
+                <x-forms.input wire:model="excerpt" name="excerpt" label="Excerpt (shown on the blog listing)" type="text" required />
 
-            <div class="flex flex-col gap-1.5">
-                <label for="body" class="text-sm font-medium text-ink-800 dark:text-linen-100">Body</label>
-                <textarea wire:model="body" id="body" rows="10" class="w-full rounded-md border px-3 py-2 text-sm font-mono bg-white dark:bg-ink-900 border-ink-200 dark:border-ink-700 focus:outline-none focus:ring-2 focus:ring-copper-400"></textarea>
-            </div>
-
-            <x-forms.input wire:model="featuredImage" name="featuredImage" label="Featured image URL" type="text" placeholder="https://…" />
-
-            <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
-                    <label for="blogCategoryId" class="text-sm font-medium text-ink-800 dark:text-linen-100">Category</label>
-                    <select wire:model="blogCategoryId" id="blogCategoryId" class="rounded-md border px-3 py-2 text-sm bg-white dark:bg-ink-900 border-ink-200 dark:border-ink-700 focus:outline-none focus:ring-2 focus:ring-copper-400">
-                        <option value="">— Select a category —</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    <label for="body" class="text-sm font-medium text-ink-800 dark:text-linen-100">Body</label>
+                    <textarea wire:model="body" id="body" rows="10" class="w-full rounded-md border px-3 py-2 text-sm font-mono bg-white dark:bg-ink-900 border-ink-200 dark:border-ink-700 focus:outline-none focus:ring-2 focus:ring-copper-400"></textarea>
+                </div>
+
+                <x-forms.input wire:model="featuredImage" name="featuredImage" label="Featured image URL" type="text" placeholder="https://…" />
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1.5">
+                        <label for="blogCategoryId" class="text-sm font-medium text-ink-800 dark:text-linen-100">Category</label>
+                        <select wire:model="blogCategoryId" id="blogCategoryId" class="rounded-md border px-3 py-2 text-sm bg-white dark:bg-ink-900 border-ink-200 dark:border-ink-700 focus:outline-none focus:ring-2 focus:ring-copper-400">
+                            <option value="">— Select a category —</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('blogCategoryId') <p class="text-xs text-danger-500">{{ $message }}</p> @enderror
+                    </div>
+                    <x-forms.input wire:model="readTimeMinutes" name="readTimeMinutes" label="Read time (minutes)" type="number" required />
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-ink-800 dark:text-linen-100">Tags</label>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach ($tags as $tag)
+                            <label class="flex items-center gap-1.5 text-xs rounded-full border px-3 py-1.5 cursor-pointer border-ink-900/15 dark:border-linen-100/15">
+                                <input type="checkbox" wire:model="selectedTagIds" value="{{ $tag->id }}" class="accent-copper-500" />
+                                {{ $tag->name }}
+                            </label>
                         @endforeach
-                    </select>
-                    @error('blogCategoryId') <p class="text-xs text-danger-500">{{ $message }}</p> @enderror
+                    </div>
                 </div>
-                <x-forms.input wire:model="readTimeMinutes" name="readTimeMinutes" label="Read time (minutes)" type="number" required />
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1.5">
+                        <label for="status" class="text-sm font-medium text-ink-800 dark:text-linen-100">Status</label>
+                        <select wire:model="status" id="status" class="rounded-md border px-3 py-2 text-sm bg-white dark:bg-ink-900 border-ink-200 dark:border-ink-700 focus:outline-none focus:ring-2 focus:ring-copper-400">
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                        </select>
+                    </div>
+                    <x-forms.input wire:model="publishedAt" name="publishedAt" label="Publish at (blank = now)" type="datetime-local" />
+                </div>
+
+                <x-forms.checkbox wire:model="isFeatured" name="isFeatured" label="Featured" />
             </div>
 
-            <div class="space-y-2">
-                <label class="text-sm font-medium text-ink-800 dark:text-linen-100">Tags</label>
-                <div class="flex flex-wrap gap-2">
-                    @foreach ($tags as $tag)
-                        <label class="flex items-center gap-1.5 text-xs rounded-full border px-3 py-1.5 cursor-pointer border-ink-900/15 dark:border-linen-100/15">
-                            <input type="checkbox" wire:model="selectedTagIds" value="{{ $tag->id }}" class="accent-copper-500" />
-                            {{ $tag->name }}
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="flex flex-col gap-1.5">
-                    <label for="status" class="text-sm font-medium text-ink-800 dark:text-linen-100">Status</label>
-                    <select wire:model="status" id="status" class="rounded-md border px-3 py-2 text-sm bg-white dark:bg-ink-900 border-ink-200 dark:border-ink-700 focus:outline-none focus:ring-2 focus:ring-copper-400">
-                        <option value="draft">Draft</option>
-                        <option value="published">Published</option>
-                    </select>
-                </div>
-                <x-forms.input wire:model="publishedAt" name="publishedAt" label="Publish at (blank = now)" type="datetime-local" />
-            </div>
-
-            <x-forms.checkbox wire:model="isFeatured" name="isFeatured" label="Featured" />
-
-            <div class="flex gap-3">
+            {{-- Outside the scrolling area on purpose - always visible,
+                 never requires scrolling down to find. --}}
+            <div class="flex gap-3 pt-2 border-t border-ink-900/10 dark:border-linen-100/10">
                 <x-forms.button type="button" variant="secondary" class="flex-1" @click="close()">Cancel</x-forms.button>
                 <x-forms.button type="submit" variant="primary" class="flex-1">Save</x-forms.button>
             </div>

@@ -128,6 +128,8 @@ class Services extends Component
     public function confirmDelete(Service $service): void
     {
         $this->confirmingDeleteId = $service->id;
+    
+        $this->dispatch('open-modal', name: 'confirm-delete');
     }
 
     public function deleteConfirmed(): void

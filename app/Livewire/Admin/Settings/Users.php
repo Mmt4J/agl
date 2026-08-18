@@ -77,6 +77,8 @@ class Users extends Component
         abort_if($user->id === auth()->id(), 403);
 
         $this->confirmingDeleteUserId = $user->id;
+
+        $this->dispatch('open-modal', name: 'confirm-delete-user');
     }
 
     // Actually deletes - only ever called from the modal's Confirm button,

@@ -77,6 +77,8 @@ class Faqs extends Component
     public function confirmDelete(Faq $faq): void
     {
         $this->confirmingDeleteId = $faq->id;
+
+        $this->dispatch('open-modal', name: 'confirm-delete');
     }
 
     public function deleteConfirmed(): void

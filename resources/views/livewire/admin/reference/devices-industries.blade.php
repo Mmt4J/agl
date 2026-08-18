@@ -17,7 +17,7 @@
                         <p class="text-xs text-ink-900/50 dark:text-linen-100/50 truncate">{{ $device->examples }}</p>
                     </div>
                     <button type="button" wire:click="editDevice({{ $device->id }})" class="text-xs text-copper-600 dark:text-copper-300">Edit</button>
-                    <button type="button" wire:click="confirmDelete('device', {{ $device->id }})" @click="$dispatch('open-modal', { name: 'confirm-delete' })" class="text-danger-500" aria-label="Delete {{ $device->name }}">
+                    <button type="button" wire:click="confirmDelete('device', {{ $device->id }})" class="text-danger-500" aria-label="Delete {{ $device->name }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -44,7 +44,7 @@
                         <p class="text-xs text-ink-900/50 dark:text-linen-100/50 truncate">{{ $industry->description }}</p>
                     </div>
                     <button type="button" wire:click="editIndustry({{ $industry->id }})" class="text-xs text-copper-600 dark:text-copper-300">Edit</button>
-                    <button type="button" wire:click="confirmDelete('industry', {{ $industry->id }})" @click="$dispatch('open-modal', { name: 'confirm-delete' })" class="text-danger-500" aria-label="Delete {{ $industry->name }}">
+                    <button type="button" wire:click="confirmDelete('industry', {{ $industry->id }})" class="text-danger-500" aria-label="Delete {{ $industry->name }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>

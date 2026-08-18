@@ -86,6 +86,8 @@ class Testimonials extends Component
     public function confirmDelete(Testimonial $testimonial): void
     {
         $this->confirmingDeleteId = $testimonial->id;
+    
+        $this->dispatch('open-modal', name: 'confirm-delete');
     }
 
     public function deleteConfirmed(): void

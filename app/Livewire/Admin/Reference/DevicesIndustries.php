@@ -117,6 +117,8 @@ class DevicesIndustries extends Component
     {
         $this->confirmingDeleteType = $type;
         $this->confirmingDeleteId = $id;
+    
+        $this->dispatch('open-modal', name: 'confirm-delete');
     }
 
     public function deleteConfirmed(): void

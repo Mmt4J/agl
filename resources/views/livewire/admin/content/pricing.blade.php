@@ -12,7 +12,7 @@
                 <div class="flex items-center gap-2">
                     <h2 class="font-display font-semibold">{{ $category->name }}</h2>
                     <button type="button" wire:click="editCategory({{ $category->id }})" class="text-xs text-copper-600 dark:text-copper-300">Edit</button>
-                    <button type="button" wire:click="confirmDelete('category', {{ $category->id }})" @click="$dispatch('open-modal', { name: 'confirm-delete' })" class="text-danger-500" aria-label="Delete {{ $category->name }} category">
+                    <button type="button" wire:click="confirmDelete('category', {{ $category->id }})" class="text-danger-500" aria-label="Delete {{ $category->name }} category">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -32,7 +32,7 @@
                             <span class="font-mono text-[10px] px-2 py-1 rounded-full bg-copper-500/15 text-copper-600 dark:text-copper-300 shrink-0">highlighted</span>
                         @endif
                         <button type="button" wire:click="editPlan({{ $plan->id }})" class="text-xs text-copper-600 dark:text-copper-300 shrink-0">Edit</button>
-                        <button type="button" wire:click="confirmDelete('plan', {{ $plan->id }})" @click="$dispatch('open-modal', { name: 'confirm-delete' })" class="text-danger-500 shrink-0" aria-label="Delete {{ $plan->name }}">
+                        <button type="button" wire:click="confirmDelete('plan', {{ $plan->id }})" class="text-danger-500 shrink-0" aria-label="Delete {{ $plan->name }}">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>

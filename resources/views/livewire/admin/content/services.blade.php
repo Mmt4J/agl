@@ -21,7 +21,7 @@
                 @endif
 
                 <button type="button" wire:click="editService({{ $service->id }})" class="text-xs text-copper-600 dark:text-copper-300 shrink-0">Edit</button>
-                <button type="button" wire:click="confirmDelete({{ $service->id }})" @click="$dispatch('open-modal', { name: 'confirm-delete' })" class="text-danger-500 shrink-0" aria-label="Delete {{ $service->name }}">
+                <button type="button" wire:click="confirmDelete({{ $service->id }})" class="text-danger-500 shrink-0" aria-label="Delete {{ $service->name }}">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
