@@ -21,7 +21,7 @@
         @foreach ($users as $user)
             @php $isSelf = $user->id === auth()->id(); @endphp
 
-            <div class="rounded-md border border-ink-900/10 dark:border-linen-100/10 bg-white dark:bg-ink-900/40 p-4 flex items-center gap-3">
+            <div wire:key="user-{{ $user->id }}" class="rounded-md border border-ink-900/10 dark:border-linen-100/10 bg-white dark:bg-ink-900/40 p-4 flex items-center gap-3">
                 <span class="w-10 h-10 rounded-full bg-ink-900 dark:bg-copper-500 text-linen-50 dark:text-ink-950 grid place-items-center font-display font-semibold text-sm shrink-0">
                     {{ $user->initials() }}
                 </span>
@@ -102,7 +102,7 @@
             <form wire:submit="createUser" class="space-y-6">
                 <h2 class="font-display text-lg font-semibold text-ink-950 dark:text-linen-50">Create user</h2>
 
-                <x-forms.input wire:model="name" name="name" label="Full name" type="text" required autofocus />
+                <x-forms.input wire:model="fullName" name="fullName" label="Full name" type="text" required autofocus />
                 <x-forms.input wire:model="email" name="email" label="Email" type="email" required />
 
                 <div class="flex flex-col gap-1.5">

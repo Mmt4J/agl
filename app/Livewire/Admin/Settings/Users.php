@@ -17,7 +17,7 @@ class Users extends Component
 {
     use WithPagination;
 
-    public string $name = '';
+    public string $fullName = '';
     public string $email = '';
     public string $role = 'editor';
 
@@ -39,7 +39,7 @@ class Users extends Component
     public function createUser(): void
     {
         $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'fullName' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
             'role' => ['required', 'in:admin,editor'],
         ]);
@@ -47,17 +47,19 @@ class Users extends Component
         $password = Str::password(16);
 
         User::create([
-            ...$validated,
+            'name' => $validated['fullName'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
             'password' => Hash::make($password),
         ]);
 
         $this->generatedPassword = $password;
-        $this->reset('name', 'email', 'role');
+        $this->reset('fullName', 'email', 'role');
     }
 
     public function closeCreateModal(): void
     {
-        $this->reset('name', 'email', 'role', 'generatedPassword');
+        $this->reset('fullName', 'email', 'role', 'generatedPassword');
         $this->resetErrorBag();
     }
 

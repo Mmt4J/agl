@@ -19,18 +19,15 @@ class Blog extends Component
 {
     use WithPagination;
 
-    // Category lookup form state
     public ?int $categoryId = null;
     public string $categoryName = '';
 
-    // Tag lookup form state
     public ?int $tagId = null;
-    public string $tagName = '';
+    public string $tagLabel = '';
 
-    // Post form state
     public ?int $postId = null;
     public ?int $blogCategoryId = null;
-    public string $title = '';
+    public string $postTitle = '';
     public string $slug = '';
     public string $excerpt = '';
     public string $body = '';
@@ -57,6 +54,7 @@ class Blog extends Component
     {
         $this->reset('categoryId', 'categoryName');
         $this->resetErrorBag();
+        $this->dispatch('open-modal', name: 'category-form');
     }
 
     public function editCategory(BlogCategory $category): void
@@ -83,25 +81,26 @@ class Blog extends Component
 
     public function newTag(): void
     {
-        $this->reset('tagId', 'tagName');
+        $this->reset('tagId', 'tagLabel');
         $this->resetErrorBag();
+        $this->dispatch('open-modal', name: 'tag-form');
     }
 
     public function editTag(Tag $tag): void
     {
         $this->tagId = $tag->id;
-        $this->tagName = $tag->name;
+        $this->tagLabel = $tag->name;
 
         $this->dispatch('open-modal', name: 'tag-form');
     }
 
     public function saveTag(): void
     {
-        $validated = $this->validate(['tagName' => ['required', 'string', 'max:255']]);
+        $validated = $this->validate(['tagLabel' => ['required', 'string', 'max:255']]);
 
         $tag = $this->tagId ? Tag::findOrFail($this->tagId) : new Tag();
-        $tag->name = $validated['tagName'];
-        $tag->slug = $tag->slug ?: Str::slug($validated['tagName']);
+        $tag->name = $validated['tagLabel'];
+        $tag->slug = $tag->slug ?: Str::slug($validated['tagLabel']);
         $tag->save();
 
         $this->dispatch('toast', message: 'Tag saved.');
@@ -112,20 +111,21 @@ class Blog extends Component
     public function newPost(): void
     {
         $this->reset(
-            'postId', 'blogCategoryId', 'title', 'slug', 'excerpt', 'body',
+            'postId', 'blogCategoryId', 'postTitle', 'slug', 'excerpt', 'body',
             'featuredImage', 'readTimeMinutes', 'publishedAt', 'selectedTagIds'
         );
         $this->isFeatured = false;
         $this->status = 'draft';
         $this->readTimeMinutes = 5;
         $this->resetErrorBag();
+        $this->dispatch('open-modal', name: 'post-form');
     }
 
     public function editPost(BlogPost $post): void
     {
         $this->postId = $post->id;
         $this->blogCategoryId = $post->blog_category_id;
-        $this->title = $post->title;
+        $this->postTitle = $post->title;
         $this->slug = $post->slug;
         $this->excerpt = $post->excerpt;
         $this->body = $post->body;
@@ -143,7 +143,7 @@ class Blog extends Component
     {
         $validated = $this->validate([
             'blogCategoryId' => ['required', 'exists:blog_categories,id'],
-            'title' => ['required', 'string', 'max:255'],
+            'postTitle' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('blog_posts', 'slug')->ignore($this->postId)],
             'excerpt' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string'],
@@ -156,17 +156,14 @@ class Blog extends Component
 
         $post = $this->postId ? BlogPost::findOrFail($this->postId) : new BlogPost();
 
-        // Publishing without an explicit date/time defaults to right now -
-        // a manually-set FUTURE date instead schedules it, since
-        // scopePublished() already checks published_at <= now().
         $publishedAt = $validated['publishedAt']
             ?: ($validated['status'] === 'published' ? now() : null);
 
         $post->fill([
             'blog_category_id' => $validated['blogCategoryId'],
             'author_id' => $post->author_id ?? auth()->id(),
-            'title' => $validated['title'],
-            'slug' => $validated['slug'] ?: Str::slug($validated['title']),
+            'title' => $validated['postTitle'],
+            'slug' => $validated['slug'] ?: Str::slug($validated['postTitle']),
             'excerpt' => $validated['excerpt'],
             'body' => $validated['body'],
             'featured_image' => $validated['featuredImage'] ?: null,
@@ -187,15 +184,12 @@ class Blog extends Component
     {
         $this->confirmingDeleteType = $type;
         $this->confirmingDeleteId = $id;
-    
+
         $this->dispatch('open-modal', name: 'confirm-delete');
     }
 
     public function deleteConfirmed(): void
     {
-        // blog_category_id uses restrictOnDelete (not cascade) - a category
-        // with posts still attached would otherwise throw a raw database
-        // exception here instead of a message the admin can actually act on.
         if ($this->confirmingDeleteType === 'category') {
             $category = BlogCategory::findOrFail($this->confirmingDeleteId);
 
@@ -212,7 +206,6 @@ class Blog extends Component
         match ($this->confirmingDeleteType) {
             'category' => BlogCategory::findOrFail($this->confirmingDeleteId)->delete(),
             'tag' => Tag::findOrFail($this->confirmingDeleteId)->delete(),
-            // SoftDeletes - hides it, doesn't erase the content.
             'post' => BlogPost::findOrFail($this->confirmingDeleteId)->delete(),
             default => null,
         };

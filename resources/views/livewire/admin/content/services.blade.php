@@ -8,7 +8,7 @@
 
     <div class="space-y-2">
         @foreach ($services as $service)
-            <div class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-4">
+            <div wire:key="service-{{ $service->id }}" class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-4">
                 <span class="font-mono text-xs text-copper-600 dark:text-copper-300 shrink-0 w-10">{{ $service->code }}</span>
 
                 <div class="min-w-0 flex-1">
@@ -34,7 +34,7 @@
 
             <div class="grid grid-cols-3 gap-4">
                 <x-forms.input wire:model="code" name="code" label="Code" type="text" placeholder="A.1" required />
-                <x-forms.input wire:model="name" name="name" label="Name" type="text" required class="col-span-2" />
+                <x-forms.input wire:model="serviceName" name="serviceName" label="Name" type="text" required class="col-span-2" />
             </div>
 
             <x-forms.input wire:model="slug" name="slug" label="Slug (leave blank to auto-generate)" type="text" />
@@ -62,7 +62,7 @@
                 </div>
 
                 @foreach ($features as $index => $row)
-                    <div class="flex items-center gap-2">
+                    <div wire:key="feature-{{ $index }}" class="flex items-center gap-2">
                         <input
                             type="text"
                             wire:model="features.{{ $index }}.feature"

@@ -16,7 +16,7 @@ class Services extends Component
 {
     public ?int $serviceId = null;
     public string $code = '';
-    public string $name = '';
+    public string $serviceName = '';
     public string $slug = '';
     public string $shortDescription = '';
     public string $blurb = '';
@@ -41,7 +41,7 @@ class Services extends Component
 
     public function newService(): void
     {
-        $this->reset('serviceId', 'code', 'name', 'slug', 'shortDescription', 'blurb', 'description', 'icon', 'sortOrder');
+        $this->reset('serviceId', 'code', 'serviceName', 'slug', 'shortDescription', 'blurb', 'description', 'icon', 'sortOrder');
         $this->isFeatured = true;
         $this->features = [];
         $this->resetErrorBag();
@@ -51,7 +51,7 @@ class Services extends Component
     {
         $this->serviceId = $service->id;
         $this->code = $service->code;
-        $this->name = $service->name;
+        $this->serviceName = $service->name;
         $this->slug = $service->slug;
         $this->shortDescription = $service->short_description;
         $this->blurb = $service->blurb;
@@ -84,7 +84,7 @@ class Services extends Component
     {
         $validated = $this->validate([
             'code' => ['required', 'string', 'max:10', Rule::unique('services', 'code')->ignore($this->serviceId)],
-            'name' => ['required', 'string', 'max:255'],
+            'serviceName' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('services', 'slug')->ignore($this->serviceId)],
             'shortDescription' => ['required', 'string', 'max:255'],
             'blurb' => ['required', 'string', 'max:255'],
@@ -98,8 +98,8 @@ class Services extends Component
         $service = $this->serviceId ? Service::findOrFail($this->serviceId) : new Service();
         $service->fill([
             'code' => $validated['code'],
-            'name' => $validated['name'],
-            'slug' => $validated['slug'] ?: Str::slug($validated['name']),
+            'name' => $validated['serviceName'],
+            'slug' => $validated['slug'] ?: Str::slug($validated['serviceName']),
             'short_description' => $validated['shortDescription'],
             'blurb' => $validated['blurb'],
             'description' => $validated['description'],
@@ -128,7 +128,7 @@ class Services extends Component
     public function confirmDelete(Service $service): void
     {
         $this->confirmingDeleteId = $service->id;
-    
+
         $this->dispatch('open-modal', name: 'confirm-delete');
     }
 

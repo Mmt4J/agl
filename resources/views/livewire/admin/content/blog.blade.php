@@ -9,7 +9,7 @@
             </div>
             <div class="space-y-2">
                 @foreach ($categories as $category)
-                    <div class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-2.5">
+                    <div wire:key="category-{{ $category->id }}" class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-2.5">
                         <p class="flex-1 text-sm">{{ $category->name }} <span class="text-ink-900/40 dark:text-linen-100/40">({{ $category->posts_count }})</span></p>
                         <button type="button" wire:click="editCategory({{ $category->id }})" class="text-xs text-copper-600 dark:text-copper-300">Edit</button>
                         <button type="button" wire:click="confirmDelete('category', {{ $category->id }})" class="text-danger-500" aria-label="Delete {{ $category->name }}">
@@ -27,7 +27,7 @@
             </div>
             <div class="space-y-2">
                 @foreach ($tags as $tag)
-                    <div class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-2.5">
+                    <div wire:key="tag-{{ $tag->id }}" class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-2.5">
                         <p class="flex-1 text-sm">{{ $tag->name }}</p>
                         <button type="button" wire:click="editTag({{ $tag->id }})" class="text-xs text-copper-600 dark:text-copper-300">Edit</button>
                         <button type="button" wire:click="confirmDelete('tag', {{ $tag->id }})" class="text-danger-500" aria-label="Delete {{ $tag->name }}">
@@ -54,7 +54,7 @@
 
         <div class="space-y-2">
             @foreach ($posts as $post)
-                <div class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-4">
+                <div wire:key="post-{{ $post->id }}" class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-4">
                     <span class="font-mono text-[10px] px-2 py-1 rounded-full shrink-0 {{ $post->status === 'published' ? 'bg-sage-500/15 text-sage-600 dark:text-sage-400' : 'bg-ink-900/8 dark:bg-linen-100/10 text-ink-900/40 dark:text-linen-100/40' }}">
                         {{ $post->status }}
                     </span>
@@ -94,7 +94,7 @@
     <x-forms.modal name="tag-form">
         <form wire:submit="saveTag" class="space-y-6">
             <h2 class="font-display text-lg font-semibold">{{ $tagId ? 'Edit tag' : 'Add tag' }}</h2>
-            <x-forms.input wire:model="tagName" name="tagName" label="Name" type="text" required />
+            <x-forms.input wire:model="tagLabel" name="tagLabel" label="Name" type="text" required />
             <div class="flex gap-3">
                 <x-forms.button type="button" variant="secondary" class="flex-1" @click="close()">Cancel</x-forms.button>
                 <x-forms.button type="submit" variant="primary" class="flex-1">Save</x-forms.button>
@@ -108,7 +108,7 @@
             <div class="max-h-[65vh] overflow-y-auto pr-1 space-y-6">
                 <h2 class="font-display text-lg font-semibold">{{ $postId ? 'Edit post' : 'Write post' }}</h2>
 
-                <x-forms.input wire:model="title" name="title" label="Title" type="text" required autofocus />
+                <x-forms.input wire:model="postTitle" name="postTitle" label="Title" type="text" required autofocus />
                 <x-forms.input wire:model="slug" name="slug" label="Slug (leave blank to auto-generate)" type="text" />
                 <x-forms.input wire:model="excerpt" name="excerpt" label="Excerpt (shown on the blog listing)" type="text" required />
 
@@ -137,7 +137,7 @@
                     <label class="text-sm font-medium text-ink-800 dark:text-linen-100">Tags</label>
                     <div class="flex flex-wrap gap-2">
                         @foreach ($tags as $tag)
-                            <label class="flex items-center gap-1.5 text-xs rounded-full border px-3 py-1.5 cursor-pointer border-ink-900/15 dark:border-linen-100/15">
+                            <label wire:key="tag-checkbox-{{ $tag->id }}" class="flex items-center gap-1.5 text-xs rounded-full border px-3 py-1.5 cursor-pointer border-ink-900/15 dark:border-linen-100/15">
                                 <input type="checkbox" wire:model="selectedTagIds" value="{{ $tag->id }}" class="accent-copper-500" />
                                 {{ $tag->name }}
                             </label>
