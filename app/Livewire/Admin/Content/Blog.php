@@ -42,10 +42,6 @@ class Blog extends Component
     public ?string $confirmingDeleteType = null;
     public ?int $confirmingDeleteId = null;
 
-    // Paginated - for the Categories management island's own list.
-    // Named pagination ('categoriesPage') so this list's page number
-    // is tracked independently from tags/posts, which each have their
-    // own page too.
     #[Computed]
     public function paginatedCategories()
     {
@@ -53,9 +49,7 @@ class Blog extends Component
     }
 
     // Full, unpaginated - for the post-form's category <select> and the
-    // "add a category first" empty-state check. Deliberately separate
-    // from paginatedCategories() above: a dropdown shouldn't hide
-    // options behind a "page 2" a post-writer would never think to check.
+    // "add a category first" empty-state check.
     #[Computed]
     public function categories()
     {
@@ -109,9 +103,6 @@ class Blog extends Component
         $category->slug = $category->slug ?: Str::slug($validated['categoryName']);
         $category->save();
 
-        // Newly created/renamed category can shift which page it lands
-        // on (alphabetical order) - reset to page 1 so it's visible
-        // immediately instead of possibly landing on a stale page.
         $this->resetPage('categoriesPage');
 
         $this->dispatch('toast', message: 'Category saved.');
@@ -217,8 +208,6 @@ class Blog extends Component
 
         $post->tags()->sync($this->selectedTagIds);
 
-        // Sorted by latest(), so a new/re-timestamped post always lands
-        // on page 1 - reset so the admin sees what they just saved.
         $this->resetPage('postsPage');
 
         $this->dispatch('toast', message: 'Post saved.');
@@ -231,7 +220,12 @@ class Blog extends Component
         $this->confirmingDeleteType = $type;
         $this->confirmingDeleteId = $id;
 
-        $this->dispatch('open-modal', name: 'confirm-delete');
+        // Each entity type has its OWN modal name, nested inside its own
+        // island (see the view). This is the key fix: the trigger button
+        // and the modal it opens now live in the same island, so the
+        // island's re-render always includes fresh modal content - no
+        // cross-island staleness, no manual wire:island targeting needed.
+        $this->dispatch('open-modal', name: $this->deleteModalName());
     }
 
     public function deleteConfirmed(): void
@@ -241,7 +235,7 @@ class Blog extends Component
 
             if ($category->posts()->exists()) {
                 $this->dispatch('toast', message: 'Move or delete its posts first.', type: 'danger');
-                $this->dispatch('close-modal', name: 'confirm-delete');
+                $this->dispatch('close-modal', name: $this->deleteModalName());
                 $this->confirmingDeleteType = null;
                 $this->confirmingDeleteId = null;
 
@@ -256,8 +250,6 @@ class Blog extends Component
             default => null,
         };
 
-        // Deleting the last item on a page (e.g. only tag on page 2)
-        // would otherwise strand the admin on a now-empty page.
         match ($this->confirmingDeleteType) {
             'category' => $this->resetPage('categoriesPage'),
             'tag' => $this->resetPage('tagsPage'),
@@ -266,15 +258,25 @@ class Blog extends Component
         };
 
         $this->dispatch('toast', message: 'Deleted.', type: 'danger');
-        $this->dispatch('close-modal', name: 'confirm-delete');
+        $this->dispatch('close-modal', name: $this->deleteModalName());
         $this->confirmingDeleteType = null;
         $this->confirmingDeleteId = null;
+    }
+
+    private function deleteModalName(): string
+    {
+        return match ($this->confirmingDeleteType) {
+            'category' => 'confirm-delete-category',
+            'tag' => 'confirm-delete-tag',
+            'post' => 'confirm-delete-post',
+            default => 'confirm-delete-category',
+        };
     }
 
     #[On('modal-closed')]
     public function onModalClosed(string $name): void
     {
-        if ($name === 'confirm-delete') {
+        if (in_array($name, ['confirm-delete-category', 'confirm-delete-tag', 'confirm-delete-post'], true)) {
             $this->confirmingDeleteType = null;
             $this->confirmingDeleteId = null;
         }
