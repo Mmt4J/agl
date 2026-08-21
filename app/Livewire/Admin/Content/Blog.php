@@ -7,6 +7,7 @@ use App\Models\BlogPost;
 use App\Models\Tag;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -41,20 +42,47 @@ class Blog extends Component
     public ?string $confirmingDeleteType = null;
     public ?int $confirmingDeleteId = null;
 
+    // Paginated - for the Categories management island's own list.
+    // Named pagination ('categoriesPage') so this list's page number
+    // is tracked independently from tags/posts, which each have their
+    // own page too.
+    #[Computed]
+    public function paginatedCategories()
+    {
+        return BlogCategory::orderBy('name')->withCount('posts')->paginate(5, ['*'], 'categoriesPage');
+    }
+
+    // Full, unpaginated - for the post-form's category <select> and the
+    // "add a category first" empty-state check. Deliberately separate
+    // from paginatedCategories() above: a dropdown shouldn't hide
+    // options behind a "page 2" a post-writer would never think to check.
+    #[Computed]
+    public function categories()
+    {
+        return BlogCategory::orderBy('name')->get();
+    }
+
+    #[Computed]
+    public function paginatedTags()
+    {
+        return Tag::orderBy('name')->paginate(5, ['*'], 'tagsPage');
+    }
+
+    #[Computed]
+    public function tags()
+    {
+        return Tag::orderBy('name')->get();
+    }
+
+    #[Computed]
+    public function posts()
+    {
+        return BlogPost::with(['category', 'author'])->latest()->paginate(10, ['*'], 'postsPage');
+    }
+
     public function render()
     {
-        return view('livewire.admin.content.blog', [
-            'categories' => BlogCategory::orderBy('name')
-                ->withCount('posts')
-                ->paginate(5, ['*'], 'categoriesPage'),
-
-            'tags' => Tag::orderBy('name')
-                ->paginate(5, ['*'], 'tagsPage'),
-
-            'posts' => BlogPost::with(['category', 'author'])
-                ->latest()
-                ->paginate(5, ['*'], 'postsPage'),
-        ]);
+        return view('livewire.admin.content.blog');
     }
 
     public function newCategory(): void
@@ -81,7 +109,11 @@ class Blog extends Component
         $category->slug = $category->slug ?: Str::slug($validated['categoryName']);
         $category->save();
 
+        // Newly created/renamed category can shift which page it lands
+        // on (alphabetical order) - reset to page 1 so it's visible
+        // immediately instead of possibly landing on a stale page.
         $this->resetPage('categoriesPage');
+
         $this->dispatch('toast', message: 'Category saved.');
         $this->dispatch('close-modal', name: 'category-form');
         $this->newCategory();
@@ -112,6 +144,7 @@ class Blog extends Component
         $tag->save();
 
         $this->resetPage('tagsPage');
+
         $this->dispatch('toast', message: 'Tag saved.');
         $this->dispatch('close-modal', name: 'tag-form');
         $this->newTag();
@@ -184,6 +217,10 @@ class Blog extends Component
 
         $post->tags()->sync($this->selectedTagIds);
 
+        // Sorted by latest(), so a new/re-timestamped post always lands
+        // on page 1 - reset so the admin sees what they just saved.
+        $this->resetPage('postsPage');
+
         $this->dispatch('toast', message: 'Post saved.');
         $this->dispatch('close-modal', name: 'post-form');
         $this->newPost();
@@ -219,14 +256,14 @@ class Blog extends Component
             default => null,
         };
 
+        // Deleting the last item on a page (e.g. only tag on page 2)
+        // would otherwise strand the admin on a now-empty page.
         match ($this->confirmingDeleteType) {
             'category' => $this->resetPage('categoriesPage'),
             'tag' => $this->resetPage('tagsPage'),
             'post' => $this->resetPage('postsPage'),
-        default => null,
+            default => null,
         };
-
-        $this->dispatch('toast', message: 'Deleted.', type: 'danger');
 
         $this->dispatch('toast', message: 'Deleted.', type: 'danger');
         $this->dispatch('close-modal', name: 'confirm-delete');
