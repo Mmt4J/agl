@@ -76,7 +76,7 @@
                 <x-forms.input wire:model="periodLabel" name="periodLabel" label="Period label" type="text" placeholder="one-time" required />
             </div>
 
-            <x-forms.checkbox wire:model="isHighlighted" name="isHighlighted" label="Highlighted (\"Most requested\" ribbon)" />
+            <x-forms.checkbox wire:model="isHighlighted" name="isHighlighted" label='Highlighted ("Most requested" ribbon)' />
             <x-forms.input wire:model="planSortOrder" name="planSortOrder" label="Sort order" type="number" required />
 
             <div class="space-y-2">
