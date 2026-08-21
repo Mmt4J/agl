@@ -18,6 +18,7 @@
                     </div>
                 @endforeach
             </div>
+            {{ $categories->links() }}
         </div>
 
         <div class="space-y-3">
@@ -36,6 +37,7 @@
                     </div>
                 @endforeach
             </div>
+            {{ $tags->links() }}
         </div>
     </div>
 

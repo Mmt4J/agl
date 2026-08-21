@@ -44,9 +44,16 @@ class Blog extends Component
     public function render()
     {
         return view('livewire.admin.content.blog', [
-            'categories' => BlogCategory::orderBy('name')->withCount('posts')->get(),
-            'tags' => Tag::orderBy('name')->get(),
-            'posts' => BlogPost::with(['category', 'author'])->latest()->paginate(10),
+            'categories' => BlogCategory::orderBy('name')
+                ->withCount('posts')
+                ->paginate(5, ['*'], 'categoriesPage'),
+
+            'tags' => Tag::orderBy('name')
+                ->paginate(5, ['*'], 'tagsPage'),
+
+            'posts' => BlogPost::with(['category', 'author'])
+                ->latest()
+                ->paginate(5, ['*'], 'postsPage'),
         ]);
     }
 
@@ -74,6 +81,7 @@ class Blog extends Component
         $category->slug = $category->slug ?: Str::slug($validated['categoryName']);
         $category->save();
 
+        $this->resetPage('categoriesPage');
         $this->dispatch('toast', message: 'Category saved.');
         $this->dispatch('close-modal', name: 'category-form');
         $this->newCategory();
@@ -103,6 +111,7 @@ class Blog extends Component
         $tag->slug = $tag->slug ?: Str::slug($validated['tagLabel']);
         $tag->save();
 
+        $this->resetPage('tagsPage');
         $this->dispatch('toast', message: 'Tag saved.');
         $this->dispatch('close-modal', name: 'tag-form');
         $this->newTag();
@@ -209,6 +218,15 @@ class Blog extends Component
             'post' => BlogPost::findOrFail($this->confirmingDeleteId)->delete(),
             default => null,
         };
+
+        match ($this->confirmingDeleteType) {
+            'category' => $this->resetPage('categoriesPage'),
+            'tag' => $this->resetPage('tagsPage'),
+            'post' => $this->resetPage('postsPage'),
+        default => null,
+        };
+
+        $this->dispatch('toast', message: 'Deleted.', type: 'danger');
 
         $this->dispatch('toast', message: 'Deleted.', type: 'danger');
         $this->dispatch('close-modal', name: 'confirm-delete');
