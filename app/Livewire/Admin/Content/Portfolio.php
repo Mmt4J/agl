@@ -6,6 +6,7 @@ use App\Models\PortfolioCategory;
 use App\Models\PortfolioProject;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -18,12 +19,10 @@ class Portfolio extends Component
 {
     use WithPagination;
 
-    // Category form state
     public ?int $categoryId = null;
     public string $categoryName = '';
     public int $categorySortOrder = 0;
 
-    // Project form state
     public ?int $projectId = null;
     public ?int $projectCategoryId = null;
     public string $projectTitle = '';
@@ -34,17 +33,47 @@ class Portfolio extends Component
     public bool $isFeatured = false;
     public int $projectSortOrder = 0;
 
+    // null = "All" - matches the prototype's filter-chip bar exactly,
+    // just backed by a real category id instead of a hardcoded string.
+    public ?int $categoryFilter = null;
+
     public ?string $confirmingDeleteType = null;
     public ?int $confirmingDeleteId = null;
 
+    // Paginated - categories management island's own list.
+    #[Computed]
+    public function paginatedCategories()
+    {
+        return PortfolioCategory::orderBy('sort_order')->withCount('projects')->paginate(6, ['*'], 'categoriesPage');
+    }
+
+    // Full, unpaginated - for the filter-chip bar and the project-form's
+    // category <select>. Same reasoning as Blog: chips/dropdowns
+    // shouldn't hide options behind a management-list page number.
+    #[Computed]
+    public function categories()
+    {
+        return PortfolioCategory::orderBy('sort_order')->get();
+    }
+
+    #[Computed]
+    public function projects()
+    {
+        return PortfolioProject::with('category')
+            ->when($this->categoryFilter, fn ($q) => $q->where('portfolio_category_id', $this->categoryFilter))
+            ->orderBy('sort_order')
+            ->paginate(9, ['*'], 'projectsPage'); // 9 = clean 3x3 grid
+    }
+
     public function render()
     {
-        return view('livewire.admin.content.portfolio', [
-            // Small, fixed list (5-ish categories per the migration's own
-            // comment) - no pagination needed here, unlike projects below.
-            'categories' => PortfolioCategory::orderBy('sort_order')->withCount('projects')->get(),
-            'projects' => PortfolioProject::with('category')->orderBy('sort_order')->paginate(10),
-        ]);
+        return view('livewire.admin.content.portfolio');
+    }
+
+    public function filterByCategory(?int $categoryId): void
+    {
+        $this->categoryFilter = $categoryId;
+        $this->resetPage('projectsPage');
     }
 
     public function newCategory(): void
@@ -75,6 +104,8 @@ class Portfolio extends Component
         $category->slug = $category->slug ?: Str::slug($validated['categoryName']);
         $category->sort_order = $validated['categorySortOrder'];
         $category->save();
+
+        $this->resetPage('categoriesPage');
 
         $this->dispatch('toast', message: 'Category saved.');
         $this->dispatch('close-modal', name: 'category-form');
@@ -132,9 +163,7 @@ class Portfolio extends Component
             'sort_order' => $validated['projectSortOrder'],
         ])->save();
 
-        // New/re-sorted project can shift which page it lands on -
-        // reset to page 1 so it's actually visible after saving.
-        $this->resetPage();
+        $this->resetPage('projectsPage');
 
         $this->dispatch('toast', message: 'Project saved.');
         $this->dispatch('close-modal', name: 'project-form');
@@ -152,16 +181,17 @@ class Portfolio extends Component
     public function deleteConfirmed(): void
     {
         match ($this->confirmingDeleteType) {
-            // Unlike blog categories (which block deletion if posts
-            // exist), portfolio_category_id cascades - deleting a
-            // category here genuinely deletes every project under it
-            // too. The confirmation copy in the view says this plainly.
+            // cascadeOnDelete - deleting a category takes its projects too.
             'category' => PortfolioCategory::findOrFail($this->confirmingDeleteId)->delete(),
             'project' => PortfolioProject::findOrFail($this->confirmingDeleteId)->delete(),
             default => null,
         };
 
-        $this->resetPage();
+        match ($this->confirmingDeleteType) {
+            'category' => $this->resetPage('categoriesPage'),
+            'project' => $this->resetPage('projectsPage'),
+            default => null,
+        };
 
         $this->dispatch('toast', message: 'Deleted.', type: 'danger');
         $this->dispatch('close-modal', name: 'confirm-delete');
