@@ -3,12 +3,12 @@
 namespace App\Livewire\Admin\Leads;
 
 use App\Models\NewsletterSubscriber;
-use Livewire\Component;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
-use Livewire\Attributes\Computed;
+use Livewire\Component;
 
-#[Layout('layouts.admin')]
+#[Layout('layouts::admin')]
 #[Title('Newsletter')]
 class Newsletter extends Component
 {
@@ -22,12 +22,10 @@ class Newsletter extends Component
                 'id' => $subscriber->id,
                 'email' => $subscriber->email,
                 'status' => $subscriber->status,
-                'subscribedAt' => optional($subscriber->subscribed_at)
-                    ->format('M d, Y H:i'),
+                'subscribedAt' => optional($subscriber->subscribed_at)->format('M d, Y H:i'),
             ])
             ->values();
     }
-
 
     public function render()
     {
