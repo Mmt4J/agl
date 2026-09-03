@@ -29,7 +29,7 @@
 <body class="min-h-screen antialiased bg-linen-50 dark:bg-ink-950 text-ink-950 dark:text-linen-50">
     <header class="border-b border-ink-100 dark:border-ink-800">
         <div class="mx-auto max-w-5xl px-6 h-16 flex items-center justify-between">
-            <a href="{{ route('dashboard') }}" wire:navigate class="flex items-center gap-2">
+            <a href="{{ route('admin.overview') }}" wire:navigate class="flex items-center gap-2">
                 <x-app-logo-icon class="w-8 h-8" />
                 <span class="font-display font-semibold text-ink-900 dark:text-linen-50">
                     Anesmavisa
