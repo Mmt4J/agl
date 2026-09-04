@@ -1,4 +1,4 @@
-{{--
+{{-- 
     resources/views/components/app-logo-icon.blade.php
     ------------------------------------------------------------------
     Your actual brand mark - the wax-seal circle with "AGL" lettering -
@@ -12,8 +12,8 @@
     all, only passthrough $attributes (usually just a sizing class),
     same as the original Laravel version did. Keeping it prop-free
     means it behaves like a plain, reusable <svg> you can drop
-    anywhere and resize with ordinary Tailwind classes.
---}}
+    anywhere and resize with ordinary Tailwind classes. --}}
+
 <svg viewBox="0 0 48 48" {{ $attributes }} aria-hidden="true">
     {{-- Outer seal disc --}}
     <circle cx="24" cy="24" r="22" class="fill-ink-900 dark:fill-linen-100" />
