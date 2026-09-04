@@ -23,20 +23,24 @@
 
         <nav class="hidden lg:flex items-center gap-1 ml-4" aria-label="Primary">
             @foreach ([
-                ['route' => 'website.home', 'label' => 'Home'],
-                ['route' => 'website.about', 'label' => 'About'],
-                ['route' => 'website.services', 'label' => 'Services'],
-                ['route' => 'website.industries', 'label' => 'Industries'],
-                ['route' => 'website.portfolio', 'label' => 'Portfolio'],
-                ['route' => 'website.pricing', 'label' => 'Pricing'],
-                ['route' => 'website.blog', 'label' => 'Blog'],
-                ['route' => 'website.contact', 'label' => 'Contact'],
+                ['route' => 'website.home', 'active' => 'website.home', 'label' => 'Home'],
+                ['route' => 'website.about', 'active' => 'website.about', 'label' => 'About'],
+                ['route' => 'website.services', 'active' => 'website.services', 'label' => 'Services'],
+                ['route' => 'website.industries', 'active' => 'website.industries', 'label' => 'Industries'],
+                ['route' => 'website.portfolio', 'active' => 'website.portfolio', 'label' => 'Portfolio'],
+                ['route' => 'website.pricing', 'active' => 'website.pricing', 'label' => 'Pricing'],
+                ['route' => 'website.blog', 'active' => 'website.blog*', 'label' => 'Blog'],
+                ['route' => 'website.contact', 'active' => 'website.contact', 'label' => 'Contact'],
             ] as $link)
                 <a
                     href="{{ route($link['route']) }}"
                     wire:navigate
-                    class="tab-underline px-3 py-2 text-sm text-ink-700 dark:text-linen-200 hover:text-ink-950 dark:hover:text-linen-50
-                        data-current:font-semibold data-current:text-ink-950 dark:data-current:text-linen-50"
+                    @class([
+                        'relative px-3 py-2 text-sm text-ink-700 dark:text-linen-200 hover:text-ink-950 dark:hover:text-linen-50 after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-copper-500 after:transition-transform',
+                        'font-semibold text-ink-950 dark:text-linen-50 after:scale-x-100' => request()->routeIs($link['active']),
+                        'after:scale-x-0' => ! request()->routeIs($link['active']),
+                    ])
+                    @if (request()->routeIs($link['active'])) aria-current="page" @endif
                 >
                     {{ $link['label'] }}
                 </a>
@@ -88,20 +92,24 @@
         aria-label="Mobile"
     >
         @foreach ([
-            ['route' => 'website.home', 'label' => 'Home'],
-            ['route' => 'website.about', 'label' => 'About'],
-            ['route' => 'website.services', 'label' => 'Services'],
-            ['route' => 'website.industries', 'label' => 'Industries'],
-            ['route' => 'website.portfolio', 'label' => 'Portfolio'],
-            ['route' => 'website.pricing', 'label' => 'Pricing'],
-            ['route' => 'website.blog', 'label' => 'Blog'],
-            ['route' => 'website.contact', 'label' => 'Contact'],
+            ['route' => 'website.home', 'active' => 'website.home', 'label' => 'Home'],
+            ['route' => 'website.about', 'active' => 'website.about', 'label' => 'About'],
+            ['route' => 'website.services', 'active' => 'website.services', 'label' => 'Services'],
+            ['route' => 'website.industries', 'active' => 'website.industries', 'label' => 'Industries'],
+            ['route' => 'website.portfolio', 'active' => 'website.portfolio', 'label' => 'Portfolio'],
+            ['route' => 'website.pricing', 'active' => 'website.pricing', 'label' => 'Pricing'],
+            ['route' => 'website.blog', 'active' => 'website.blog*', 'label' => 'Blog'],
+            ['route' => 'website.contact', 'active' => 'website.contact', 'label' => 'Contact'],
         ] as $link)
             <a
                 href="{{ route($link['route']) }}"
                 wire:navigate
                 @click="mobileOpen = false"
-                class="px-3 py-2.5 rounded-md text-sm text-ink-700 dark:text-linen-200 hover:bg-ink-900/5 dark:hover:bg-linen-100/10 data-current:font-semibold data-current:text-ink-950 dark:data-current:text-linen-50"
+                @class([
+                    'px-3 py-2.5 text-sm text-ink-700 dark:text-linen-200 hover:bg-ink-900/5 dark:hover:bg-linen-100/10 border-b-2 border-transparent',
+                    'font-semibold text-ink-950 dark:text-linen-50 border-copper-500' => request()->routeIs($link['active']),
+                ])
+                @if (request()->routeIs($link['active'])) aria-current="page" @endif
             >
                 {{ $link['label'] }}
             </a>

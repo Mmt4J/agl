@@ -4,6 +4,8 @@ use App\Models\PortfolioProject;
 use App\Models\Service;
 use App\Models\Setting;
 use App\Models\Testimonial;
+use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -21,25 +23,34 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
         ['code' => '07', 'name' => 'Branding', 'description' => 'Digital branding, graphic design and fashion design that make small businesses look established.'],
     ];
 
-    public function services()
+    #[Computed]
+    public function services(): Collection
     {
         return Service::ordered()->take(8)->get();
     }
 
-    public function portfolioProjects()
+    #[Computed]
+    public function portfolioProjects(): Collection
     {
         return PortfolioProject::with('category')->orderBy('sort_order')->take(3)->get();
     }
 
-    public function testimonials()
+    #[Computed]
+    public function testimonials(): Collection
     {
         return Testimonial::approved()->orderBy('sort_order')->get();
     }
 
-    public function companySetting(string $key): ?string
+    #[Computed]
+    public function companySettings(): array
     {
-        return Setting::get($key);
+        return [
+            'rc_number' => Setting::get('company.rc_number'),
+            'scuml_number' => Setting::get('company.scuml_number'),
+            'address' => Setting::get('company.address'),
+        ];
     }
+
 }; ?>
 
 <div>
@@ -48,7 +59,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
         <div class="absolute -right-24 -top-24 w-96 h-96 rounded-full text-ink-900/[0.05] dark:text-linen-100/[0.04] seal-ring" aria-hidden="true"></div>
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-16 sm:pt-20 sm:pb-24 grid lg:grid-cols-12 gap-12">
             <div class="lg:col-span-6">
-                <p class="font-mono text-xs tracking-[0.2em] uppercase text-copper-600 dark:text-copper-300 mb-4">Entry No. {{ $this->companySetting('company.rc_number') }} · Registered 15 Mar 2026</p>
+                <p class="font-mono text-xs tracking-[0.2em] uppercase text-copper-600 dark:text-copper-300 mb-4">Entry No. {{ $this->companySettings['rc_number'] }} · Registered 15 Mar 2026</p>
                 <h1 class="font-display font-semibold text-4xl sm:text-5xl lg:text-[3.4rem] leading-[1.08] tracking-tight text-ink-900 dark:text-linen-50">Seven trades.<br> One registered company.<br> <span class="text-copper-500 dark:text-copper-300">Every job on the record.</span></h1>
                 <p class="mt-6 text-ink-900/70 dark:text-linen-100/70 text-base sm:text-lg max-w-lg leading-relaxed">ANESMAVISA GLOBAL LTD keeps electronics, software, property, training and design work under one CAC-registered, SCUML-compliant name - so nothing you commission is off the books.</p>
                 <div class="mt-8 flex flex-wrap gap-3">
@@ -97,9 +108,9 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
     {{-- Trust strip --}}
     <section class="border-b border-ink-900/10 dark:border-linen-100/10 bg-linen-100 dark:bg-ink-900/40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-wrap items-center justify-center gap-x-10 gap-y-2 text-xs sm:text-sm font-mono text-ink-900/60 dark:text-linen-100/60">
-            <span>CAC · RC {{ $this->companySetting('company.rc_number') }}</span><span class="text-ink-900/20 dark:text-linen-100/20">/</span>
-            <span>SCUML · RN {{ $this->companySetting('company.scuml_number') }}</span><span class="text-ink-900/20 dark:text-linen-100/20">/</span>
-            <span>{{ $this->companySetting('company.address') ?: 'Osogbo, Osun State' }}</span><span class="text-ink-900/20 dark:text-linen-100/20">/</span><span>Incorporated 15 Mar 2026</span>
+            <span>CAC · RC {{ $this->companySettings['rc_number'] }}</span><span class="text-ink-900/20 dark:text-linen-100/20">/</span>
+            <span>SCUML · RN {{ $this->companySettings['scuml_number'] }}</span><span class="text-ink-900/20 dark:text-linen-100/20">/</span>
+            <span>{{ $this->companySettings['address'] ?: 'Osogbo, Osun State' }}</span><span class="text-ink-900/20 dark:text-linen-100/20">/</span><span>Incorporated 15 Mar 2026</span>
         </div>
     </section>
 
@@ -110,7 +121,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
             <a href="{{ route('website.services') }}" wire:navigate class="self-start sm:self-auto font-semibold text-sm underline decoration-copper-500 decoration-2 underline-offset-4">Open full schedule →</a>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            @foreach ($this->services() as $service)
+            @foreach ($this->services as $service)
                 <article wire:key="service-{{ $service->id }}" class="group rounded-md border border-ink-900/12 dark:border-linen-100/12 bg-white dark:bg-ink-900/40 p-6 hover:border-copper-500/60 transition-colors"><div class="flex items-start justify-between mb-4"><span class="w-10 h-10 rounded-md bg-ink-900/5 dark:bg-linen-100/5 text-ink-900 dark:text-copper-300 grid place-items-center">{{ $service->code }}</span><span class="font-mono text-[10px] text-ink-900/30 dark:text-linen-100/30">{{ $service->code }}</span></div><h3 class="font-display font-semibold text-base">{{ $service->name }}</h3><p class="text-sm text-ink-900/60 dark:text-linen-100/60 mt-2 leading-relaxed">{{ $service->short_description }}</p></article>
             @endforeach
         </div>
@@ -121,14 +132,14 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
     </section>
 
     {{-- Portfolio preview --}}
-    @if ($this->portfolioProjects()->isNotEmpty())
+    @if ($this->portfolioProjects->isNotEmpty())
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
             <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
                 <div><p class="font-mono text-xs uppercase tracking-widest text-copper-600 dark:text-copper-300 mb-2">Case file</p><h2 class="font-display font-semibold text-3xl sm:text-4xl">Work on record</h2></div>
                 <a href="{{ route('website.portfolio') }}" wire:navigate class="font-semibold text-sm underline decoration-copper-500 decoration-2 underline-offset-4">View full portfolio →</a>
             </div>
             <div class="grid sm:grid-cols-3 gap-6">
-                @foreach ($this->portfolioProjects() as $project)
+                @foreach ($this->portfolioProjects as $project)
                     <article wire:key="project-{{ $project->id }}" class="rounded-md border border-ink-900/12 dark:border-linen-100/12 overflow-hidden bg-white dark:bg-ink-900/40">
                         @if ($project->image_path)
                             <img src="{{ $project->image_path }}" alt="{{ $project->title }}" class="w-full h-40 object-cover" loading="lazy" />
@@ -146,11 +157,11 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
     @endif
 
     {{-- Testimonials carousel --}}
-    @if ($this->testimonials()->isNotEmpty())
+    @if ($this->testimonials->isNotEmpty())
         <section class="bg-ink-900 dark:bg-ink-950 text-linen-50 border-y border-ink-900/10 dark:border-linen-100/10">
             <div
                 x-data="{
-                    items: @js($this->testimonials()->values()),
+                    items: @js($this->testimonials->values()),
                     active: 0,
                     interval: null,
                     init() {
