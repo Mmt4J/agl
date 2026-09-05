@@ -5,15 +5,22 @@
         <div class="space-y-3">
             <div class="flex items-center justify-between">
                 <h2 class="font-display font-semibold">Device types</h2>
-                <x-forms.button type="button" variant="secondary" wire:click="newDeviceType" @click="$dispatch('open-modal', { name: 'device-type-form' })">Add</x-forms.button>
+                <x-forms.button type="button" variant="secondary" wire:click="newDeviceType"
+                    @click="$dispatch('open-modal', { name: 'device-type-form' })">Add</x-forms.button>
             </div>
             <div class="space-y-2">
                 @foreach ($deviceTypes as $type)
-                    <div class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-2.5">
+                    <div
+                        class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-2.5">
                         <p class="flex-1 text-sm">{{ $type->name }}</p>
-                        <button type="button" wire:click="editDeviceType({{ $type->id }})" class="text-xs text-copper-600 dark:text-copper-300">Edit</button>
-                        <button type="button" wire:click="confirmDelete('device-type', {{ $type->id }})" class="text-danger-500" aria-label="Delete {{ $type->name }}">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <button type="button" wire:click="editDeviceType({{ $type->id }})"
+                            class="text-xs text-copper-600 dark:text-copper-300">Edit</button>
+                        <button type="button" wire:click="confirmDelete('device-type', {{ $type->id }})"
+                            class="text-danger-500" aria-label="Delete {{ $type->name }}">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         </button>
                     </div>
                 @endforeach
@@ -23,15 +30,22 @@
         <div class="space-y-3">
             <div class="flex items-center justify-between">
                 <h2 class="font-display font-semibold">Issue types</h2>
-                <x-forms.button type="button" variant="secondary" wire:click="newIssueType" @click="$dispatch('open-modal', { name: 'issue-type-form' })">Add</x-forms.button>
+                <x-forms.button type="button" variant="secondary" wire:click="newIssueType"
+                    @click="$dispatch('open-modal', { name: 'issue-type-form' })">Add</x-forms.button>
             </div>
             <div class="space-y-2">
                 @foreach ($issueTypes as $type)
-                    <div class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-2.5">
+                    <div
+                        class="flex items-center gap-3 rounded-md border border-ink-900/10 dark:border-linen-100/10 p-2.5">
                         <p class="flex-1 text-sm">{{ $type->name }}</p>
-                        <button type="button" wire:click="editIssueType({{ $type->id }})" class="text-xs text-copper-600 dark:text-copper-300">Edit</button>
-                        <button type="button" wire:click="confirmDelete('issue-type', {{ $type->id }})" class="text-danger-500" aria-label="Delete {{ $type->name }}">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <button type="button" wire:click="editIssueType({{ $type->id }})"
+                            class="text-xs text-copper-600 dark:text-copper-300">Edit</button>
+                        <button type="button" wire:click="confirmDelete('issue-type', {{ $type->id }})"
+                            class="text-danger-500" aria-label="Delete {{ $type->name }}">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         </button>
                     </div>
                 @endforeach
@@ -63,11 +77,9 @@
                             @foreach ($issueTypes as $issueType)
                                 @php $cell = $matrix->get($deviceType->id)?->get($issueType->id); @endphp
                                 <td class="p-1">
-                                    <button
-                                        type="button"
+                                    <button type="button"
                                         wire:click="editCell({{ $deviceType->id }}, {{ $issueType->id }})"
-                                        class="w-full text-left px-2 py-1.5 rounded hover:bg-ink-900/5 dark:hover:bg-linen-100/10 {{ $cell ? 'text-ink-900 dark:text-linen-100' : 'text-ink-900/30 dark:text-linen-100/30' }}"
-                                    >
+                                        class="w-full text-left px-2 py-1.5 rounded hover:bg-ink-900/5 dark:hover:bg-linen-100/10 {{ $cell ? 'text-ink-900 dark:text-linen-100' : 'text-ink-900/30 dark:text-linen-100/30' }}">
                                         {{ $cell ? $cell->formatted_range : '—' }}
                                     </button>
                                 </td>
@@ -81,10 +93,12 @@
 
     <x-forms.modal name="device-type-form">
         <form wire:submit="saveDeviceType" class="space-y-6">
-            <h2 class="font-display text-lg font-semibold">{{ $deviceTypeId ? 'Edit device type' : 'Add device type' }}</h2>
+            <h2 class="font-display text-lg font-semibold">{{ $deviceTypeId ? 'Edit device type' : 'Add device type' }}
+            </h2>
             <x-forms.input wire:model="deviceTypeName" name="deviceTypeName" label="Name" type="text" required />
             <div class="flex gap-3">
-                <x-forms.button type="button" variant="secondary" class="flex-1" @click="close()">Cancel</x-forms.button>
+                <x-forms.button type="button" variant="secondary" class="flex-1"
+                    @click="close()">Cancel</x-forms.button>
                 <x-forms.button type="submit" variant="primary" class="flex-1">Save</x-forms.button>
             </div>
         </form>
@@ -92,10 +106,12 @@
 
     <x-forms.modal name="issue-type-form">
         <form wire:submit="saveIssueType" class="space-y-6">
-            <h2 class="font-display text-lg font-semibold">{{ $issueTypeId ? 'Edit issue type' : 'Add issue type' }}</h2>
+            <h2 class="font-display text-lg font-semibold">{{ $issueTypeId ? 'Edit issue type' : 'Add issue type' }}
+            </h2>
             <x-forms.input wire:model="issueTypeName" name="issueTypeName" label="Name" type="text" required />
             <div class="flex gap-3">
-                <x-forms.button type="button" variant="secondary" class="flex-1" @click="close()">Cancel</x-forms.button>
+                <x-forms.button type="button" variant="secondary" class="flex-1"
+                    @click="close()">Cancel</x-forms.button>
                 <x-forms.button type="submit" variant="primary" class="flex-1">Save</x-forms.button>
             </div>
         </form>
@@ -121,10 +137,13 @@
     <x-forms.modal name="confirm-delete">
         <div class="space-y-6">
             <h2 class="font-display text-lg font-semibold">Delete this entry?</h2>
-            <p class="text-sm text-ink-600 dark:text-linen-300">Any prices using it are removed too. This can't be undone.</p>
+            <p class="text-sm text-ink-600 dark:text-linen-300">Any prices using it are removed too. This can't be
+                undone.</p>
             <div class="flex gap-3">
-                <x-forms.button type="button" variant="secondary" class="flex-1" @click="close()">Cancel</x-forms.button>
-                <x-forms.button type="button" variant="danger" class="flex-1" wire:click="deleteConfirmed">Delete</x-forms.button>
+                <x-forms.button type="button" variant="secondary" class="flex-1"
+                    @click="close()">Cancel</x-forms.button>
+                <x-forms.button type="button" variant="danger" class="flex-1"
+                    wire:click="deleteConfirmed">Delete</x-forms.button>
             </div>
         </div>
     </x-forms.modal>
