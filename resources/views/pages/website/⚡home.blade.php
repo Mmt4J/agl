@@ -29,7 +29,6 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
         return Service::ordered()->take(8)->get();
     }
 
-    #[Computed]
     public function getServiceIconSvg($code)
     {
         // Map service codes to inline SVG strings (use `currentColor` for dynamic coloring)
@@ -39,7 +38,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
             'Web & Mobile Development' => '<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M3 12h18M12 3a15 15 0 010 18 15 15 0 010-18z"/></svg>',
             'Real Estate' => '<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18m-9-9v18"/></svg>',
             'ICT Training' => '<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18m-9-9v18"/></svg>',
-            'Branding & Design' => '<svg class="w-6 h-6" fill="none" viewBox="0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>',
+            'Branding & Design' => '<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>',
             'Tech Consulting' => '<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10.5h8m-8 3h5M21 12a9 9 0 11-9-9 9 9 0 019 9z"/></svg>',
             'Tech Training & ICT' => '<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0v7m-9-7v5l9 3 9-3v-5"/></svg>',
             'Digital Branding & Graphic Design' => '<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21l5-1 9-9-4-4-9 9-1 5zm10-14l3 3"/></svg>',
@@ -71,11 +70,17 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
     #[Computed]
     public function companySettings(): array
     {
-        return [
-            'rc_number' => Setting::get('company.rc_number'),
-            'scuml_number' => Setting::get('company.scuml_number'),
-            'address' => Setting::get('company.address'),
-        ];
+       $settings = Setting::whereIn('key', [
+                'company.rc_number',
+                'company.scuml_number',
+                'company.address',
+                ])->pluck('value', 'key');
+
+                return [
+                'rc_number' => $settings['company.rc_number'] ?? null,
+                'scuml_number' => $settings['company.scuml_number'] ?? null,
+                'address' => $settings['company.address'] ?? null,
+                ];
     }
 
 }; ?>
@@ -86,15 +91,18 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
         <div class="absolute -right-24 -top-24 w-96 h-96 rounded-full text-ink-900/[0.05] dark:text-linen-100/[0.04] seal-ring" aria-hidden="true"></div>
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-16 sm:pt-20 sm:pb-24 grid lg:grid-cols-12 gap-12">
             <div class="lg:col-span-6">
-                <p class="font-mono text-xs tracking-[0.2em] uppercase text-copper-600 dark:text-copper-300 mb-4">Entry No. {{ $this->companySettings['rc_number'] }} · Registered 15 Mar 2026</p>
-                <h1 class="font-display font-semibold text-4xl sm:text-5xl lg:text-[3.4rem] leading-[1.08] tracking-tight text-ink-900 dark:text-linen-50">Seven trades.<br> One registered company.<br> <span class="text-copper-500 dark:text-copper-300">Every job on the record.</span></h1>
+                <p class="font-mono text-xs tracking-[0.2em] uppercase text-copper-600 dark:text-copper-300 mb-4">
+                    Entry No. {{ $this->companySettings['rc_number'] }} · Registered 15 Mar 2026
+                </p>
+                <h1 class="font-display font-semibold text-4xl sm:text-5xl lg:text-[3.4rem] leading-[1.08] tracking-tight text-ink-900 dark:text-linen-50">Seven trades.<br> One registered company.<br> <span class="text-copper-500 dark:text-copper-300">Every job on the record.</span>
+                </h1>
                 <p class="mt-6 text-ink-900/70 dark:text-linen-100/70 text-base sm:text-lg max-w-lg leading-relaxed">ANESMAVISA GLOBAL LTD keeps electronics, software, property, training and design work under one CAC-registered, SCUML-compliant name - so nothing you commission is off the books.</p>
                 <div class="mt-8 flex flex-wrap gap-3">
                     <a href="{{ route('website.quote') }}" wire:navigate class="rounded-md bg-ink-900 dark:bg-copper-500 hover:bg-ink-800 dark:hover:bg-copper-600 text-linen-50 dark:text-ink-950 font-semibold px-6 py-3.5 text-sm sm:text-base transition-colors">Book a Service</a>
                     <a href="{{ route('website.services') }}" wire:navigate class="rounded-md border border-ink-900/25 dark:border-linen-100/25 hover:border-ink-900/60 dark:hover:border-linen-100/60 font-semibold px-6 py-3.5 text-sm sm:text-base transition-colors">Open the Services File</a>
                 </div>
                 <dl class="mt-12 grid grid-cols-3 border-t border-ink-900/15 dark:border-linen-100/15 divide-x divide-ink-900/15 dark:divide-linen-100/15 max-w-md">
-                    <div class="pt-4 pr-4"><dt class="font-mono text-[10px] uppercase tracking-widest text-ink-900/50 dark:text-linen-100/50">Divisions</dt><dd class="font-display font-semibold text-2xl mt-1">07</dd></div>
+                    <div class="pt-4 pr-4"><dt class="font-mono text-[10px] uppercase tracking-widest text-ink-900/50 dark:text-linen-100/50">Divisions</dt><dd class="font-display font-semibold text-2xl mt-1">{{ count($divisions) }}</dd></div>
                     <div class="pt-4 px-4"><dt class="font-mono text-[10px] uppercase tracking-widest text-ink-900/50 dark:text-linen-100/50">Status</dt><dd class="font-display font-semibold text-2xl mt-1 text-sage-600 dark:text-sage-500">Active</dd></div>
                     <div class="pt-4 pl-4"><dt class="font-mono text-[10px] uppercase tracking-widest text-ink-900/50 dark:text-linen-100/50">SCUML</dt><dd class="font-display font-semibold text-2xl mt-1">Yes</dd></div>
                 </dl>
@@ -162,7 +170,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
                 {{-- CAC --}}
                 <button
                     type="button"
-                    @click="copyText('{{ $this->companySettings['rc_number'] }}', 'RC number')"
+                    @click="copyText(@js($this->companySettings['rc_number']), 'RC number')"
                     class="group inline-flex items-center justify-center gap-1.5
                         rounded-md px-2 py-1
                         hover:text-copper-600 dark:hover:text-copper-300
@@ -201,7 +209,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
                 {{-- SCUML --}}
                 <button
                     type="button"
-                    @click="copyText('{{ $this->companySettings['scuml_number'] }}', 'SCUML number')"
+                    @click="copyText(@js($this->companySettings['scuml_number']), 'SCUML number')"
                     class="group inline-flex items-center justify-center gap-1.5
                         rounded-md px-2 py-1
                         hover:text-copper-600 dark:hover:text-copper-300
@@ -308,7 +316,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
             <div class="order-2 lg:order-1">
                 <p class="font-mono text-xs uppercase tracking-widest text-copper-600 dark:text-copper-300 mb-2">Certificate of record</p>
                 <h2 class="font-display font-semibold text-3xl sm:text-4xl mb-5">A registered partner, not a side hustle</h2>
-                <p class="text-ink-900/70 dark:text-linen-100/70 leading-relaxed">Founded by Matthew Ayodele Alabi and Samuel Gift Alabi, ANESMAVISA GLOBAL LTD was incorporated in March 2026 as a private company limited by shares, and registered with SCUML two months later. We consolidate services individuals and small businesses usually source from six unregistered vendors.</p>
+                <p class="text-ink-900/70 dark:text-linen-100/70 leading-relaxed mb-6">Founded by Matthew Ayodele Alabi and Samuel Gift Alabi, ANESMAVISA GLOBAL LTD was incorporated in March 2026 as a private company limited by shares, and registered with SCUML two months later. We consolidate services individuals and small businesses usually source from six unregistered vendors.</p>
                 <dl class="grid grid-cols-2 gap-5">
                     <div class="border-l-2 border-copper-500 pl-3">
                     <dt class="font-semibold text-sm">CAC Registered</dt>
@@ -321,7 +329,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
                 </dl>
                 <a href="{{ route('website.about') }}" wire:navigate class="inline-block mt-8 font-semibold text-sm underline decoration-copper-500 decoration-2 underline-offset-4">Read the full record →</a>
             </div>
-            <img src="https://placehold.co/640x520/16213a/eef0e2?text=ANESMAVISA+GLOBAL+LTD" alt="ANESMAVISA GLOBAL LTD team" class="order-1 lg:order-2 rounded-md w-full h-full object-cover" loading="lazy">
+            <img src="https://res.cloudinary.com/kapposoft-technologies/image/upload/w_1000,ar_16:9,c_fill,g_auto,e_sharpen/v1788609915/ANESMAVISA%20Tech/AGL/AGL5_uy2z5q.png" alt="ANESMAVISA GLOBAL LTD team" class="order-1 lg:order-2 rounded-md w-full h-full object-cover" loading="lazy">
         </div>
     </section>
     
@@ -363,6 +371,9 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component
                         this.interval = setInterval(() => {
                             this.active = (this.active + 1) % this.items.length;
                         }, 6000);
+                    },
+                    destroy() {
+                        clearInterval(this.interval);
                     },
                 }"
                 class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center"
