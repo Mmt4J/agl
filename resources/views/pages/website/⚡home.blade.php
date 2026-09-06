@@ -65,7 +65,6 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
         return Testimonial::approved()->orderBy('sort_order')->get();
     }
 
-    #[Computed]
     public function companySettings(): array
     {
         $settings = Setting::whereIn('key', ['company.rc_number', 'company.scuml_number', 'company.address'])->pluck('value', 'key');
@@ -87,7 +86,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
             class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-16 sm:pt-20 sm:pb-24 grid lg:grid-cols-12 gap-12">
             <div class="lg:col-span-6">
                 <p class="font-mono text-xs tracking-[0.2em] uppercase text-copper-600 dark:text-copper-300 mb-4">
-                    Entry No. {{ $this->companySettings['rc_number'] }} · Registered 15 Mar 2026
+                    Entry No. {{ $this->companySettings()['rc_number'] }} · Registered 15 Mar 2026
                 </p>
                 <h1
                     class="font-display font-semibold text-4xl sm:text-5xl lg:text-[3.4rem] leading-[1.08] tracking-tight text-ink-900 dark:text-linen-50">
@@ -194,7 +193,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
             <div class="flex flex-wrap items-center justify-center gap-y-3 sm:gap-y-2">
 
                 {{-- CAC --}}
-                <button type="button" @click="copyText(@js($this->companySettings['rc_number']), 'RC number')"
+                <button type="button" @click="copyText(@js($this->companySettings()['rc_number']), 'RC number')"
                     class="group inline-flex items-center justify-center gap-1.5
                         rounded-md px-2 py-1
                         hover:text-copper-600 dark:hover:text-copper-300
@@ -204,7 +203,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                         transition-colors"
                     title="Copy RC number">
                     <span>
-                        CAC · RC {{ $this->companySettings['rc_number'] }}
+                        CAC · RC {{ $this->companySettings()['rc_number'] }}
                     </span>
 
                     <svg class="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity"
@@ -218,7 +217,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                 <span class="hidden sm:inline mx-3 text-ink-900/20 dark:text-linen-100/20" aria-hidden="true">/</span>
 
                 {{-- SCUML --}}
-                <button type="button" @click="copyText(@js($this->companySettings['scuml_number']), 'SCUML number')"
+                <button type="button" @click="copyText(@js($this->companySettings()['scuml_number']), 'SCUML number')"
                     class="group inline-flex items-center justify-center gap-1.5
                         rounded-md px-2 py-1
                         hover:text-copper-600 dark:hover:text-copper-300
@@ -228,7 +227,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                         transition-colors"
                     title="Copy SCUML number">
                     <span>
-                        SCUML · RN {{ $this->companySettings['scuml_number'] }}
+                        SCUML · RN {{ $this->companySettings()['scuml_number'] }}
                     </span>
 
                     <svg class="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity"
@@ -246,7 +245,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                     class="relative inline-flex items-center justify-center px-2 py-1 text-center">
                     <span @mouseenter="showFull = true" @mouseleave="showFull = false">
                         @php
-                            $fullAddress = $this->companySettings['address'] ?: 'Osogbo, Osun State';
+                            $fullAddress = $this->companySettings()['address'] ?: 'Osogbo, Osun State';
                             $wordLimit = 4;
                             $words = str_word_count($fullAddress, 1);
                             $truncated =
@@ -325,12 +324,12 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                     <div class="border-l-2 border-copper-500 pl-3">
                         <dt class="font-semibold text-sm">CAC Registered</dt>
                         <dd class="text-xs text-ink-900/60 dark:text-linen-100/60 mt-0.5">RC
-                            {{ $this->companySettings['rc_number'] }}, incorporated March 2026.</dd>
+                            {{ $this->companySettings()['rc_number'] }}, incorporated March 2026.</dd>
                     </div>
                     <div class="border-l-2 border-copper-500 pl-3">
                         <dt class="font-semibold text-sm">SCUML Compliant</dt>
                         <dd class="text-xs text-ink-900/60 dark:text-linen-100/60 mt-0.5">RN
-                            {{ $this->companySettings['scuml_number'] }}, anti-money-laundering registered.</dd>
+                            {{ $this->companySettings()['scuml_number'] }}, anti-money-laundering registered.</dd>
                     </div>
                 </dl>
                 <a href="{{ route('website.about') }}" wire:navigate

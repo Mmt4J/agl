@@ -10,7 +10,6 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new #[Layout('layouts::website')] #[Title('About')] class extends Component {
-    #[Computed]
     public function companySettings(): array
     {
         $settings = Setting::whereIn('key', ['company.rc_number', 'company.scuml_number', 'company.address'])->pluck('value', 'key');
@@ -50,9 +49,9 @@ new #[Layout('layouts::website')] #[Title('About')] class extends Component {
             {{-- <div class="max-w-3xl mx-auto mt-12 pt-8 border-t border-ink-900/15 dark:border-linen-100/15">
                 <p class="font-mono text-[10px] uppercase tracking-widest text-ink-900/50 dark:text-linen-100/50 mb-5">Company register</p>
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 text-sm">
-                    <div class="space-y-1"><dt class="block text-ink-900/50 dark:text-linen-100/50">RC number</dt><dd class="block font-mono">{{ $this->companySettings['rc_number'] }}</dd></div>
-                    <div class="space-y-1"><dt class="block text-ink-900/50 dark:text-linen-100/50">SCUML number</dt><dd class="block font-mono">{{ $this->companySettings['scuml_number'] }}</dd></div>
-                    <div class="sm:col-span-2 space-y-1"><dt class="block text-ink-900/50 dark:text-linen-100/50">Registered office</dt><dd class="block wrap-break-word">{{ $this->companySettings['address'] }}</dd></div>
+                    <div class="space-y-1"><dt class="block text-ink-900/50 dark:text-linen-100/50">RC number</dt><dd class="block font-mono">{{ $this->companySettings()['rc_number'] }}</dd></div>
+                    <div class="space-y-1"><dt class="block text-ink-900/50 dark:text-linen-100/50">SCUML number</dt><dd class="block font-mono">{{ $this->companySettings()['scuml_number'] }}</dd></div>
+                    <div class="sm:col-span-2 space-y-1"><dt class="block text-ink-900/50 dark:text-linen-100/50">Registered office</dt><dd class="block wrap-break-word">{{ $this->companySettings()['address'] }}</dd></div>
                 </dl>
             </div> --}}
         </div>
