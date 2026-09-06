@@ -75,6 +75,13 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
             'address' => $settings['company.address'] ?? null,
         ];
     }
+
+    public function getDivisionCountInWordsProperty()
+    {
+        $divisionInWord = new \NumberFormatter('en', \NumberFormatter::SPELLOUT);
+
+        return $divisionInWord->format(count($this->services()));
+    }
 }; ?>
 
 <div>
@@ -90,7 +97,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                 </p>
                 <h1
                     class="font-display font-semibold text-4xl sm:text-5xl lg:text-[3.4rem] leading-[1.08] tracking-tight text-ink-900 dark:text-linen-50">
-                    Seven trades.<br> One registered company.<br> <span
+                    {{ ucfirst($this->divisionCountInWords) }} trades.<br> One registered company.<br> <span
                         class="text-copper-500 dark:text-copper-300">Every job on the record.</span>
                 </h1>
                 <p class="mt-6 text-ink-900/70 dark:text-linen-100/70 text-base sm:text-lg max-w-lg leading-relaxed">
@@ -110,7 +117,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                         <dt
                             class="font-mono text-[10px] uppercase tracking-widest text-ink-900/50 dark:text-linen-100/50">
                             Divisions</dt>
-                        <dd class="font-display font-semibold text-2xl mt-1">{{ count($divisions) }}</dd>
+                        <dd class="font-display font-semibold text-2xl mt-1">{{ count($this->services()) }}</dd>
                     </div>
                     <div class="pt-4 px-4">
                         <dt
@@ -172,13 +179,13 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
         async copyText(text, label) {
             try {
                 await navigator.clipboard.writeText(text);
-
+    
                 $dispatch('toast', {
                     message: `${label} copied successfully`
                 });
             } catch (error) {
                 console.error('Copy failed:', error);
-
+    
                 $dispatch('toast', {
                     message: `Unable to copy ${label}`
                 });
