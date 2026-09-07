@@ -1,166 +1,224 @@
-<div class="space-y-4">
+<?php
 
-    <div class="flex flex-wrap items-center gap-2">
-        @foreach ([
-            ['value' => null, 'label' => 'All'],
-            ['value' => 'new', 'label' => 'New'],
-            ['value' => 'contacted', 'label' => 'Contacted'],
-            ['value' => 'quoted', 'label' => 'Quoted'],
-            ['value' => 'won', 'label' => 'Won'],
-            ['value' => 'lost', 'label' => 'Lost'],
-        ] as $option)
-            <button
-                type="button"
-                wire:click="filterByStatus({{ $option['value'] ? "'{$option['value']}'" : 'null' }})"
-                class="px-3 py-1.5 rounded-full text-xs font-medium border transition-colors
-                    {{ $statusFilter === $option['value']
-                        ? 'bg-ink-900 dark:bg-copper-500 text-linen-50 dark:text-ink-950 border-ink-900 dark:border-copper-500'
-                        : 'border-ink-900/15 dark:border-linen-100/15 hover:bg-ink-900/5 dark:hover:bg-linen-100/5' }}"
-            >
-                {{ $option['label'] }}
-            </button>
-        @endforeach
+use App\Models\QuoteRequest;
+use App\Models\Service;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Component;
 
-        <span class="ml-auto font-mono text-xs text-ink-900/40 dark:text-linen-100/40">
-            {{ $this->requests->total() }} {{ Str::plural('request', $this->requests->total()) }}
-        </span>
-    </div>
+new #[Layout('layouts::website')] #[Title('Request a Quote')] class extends Component {
+    public int $step = 1;
+    public ?int $serviceId = null;
+    public string $preferredDate = '';
+    public string $details = '';
+    public string $fullName = '';
+    public string $phone = '';
+    public string $email = '';
+    public bool $submitted = false;
 
-    {{-- Desktop table --}}
-    <div class="hidden md:block rounded-md border border-ink-900/10 dark:border-linen-100/10 bg-white dark:bg-ink-900/40 overflow-hidden">
-        <table class="w-full text-sm">
-            <thead class="bg-ink-900/[0.03] dark:bg-linen-100/[0.04] text-left font-mono text-[10px] uppercase tracking-widest text-ink-900/50 dark:text-linen-100/50">
-                <tr>
-                    <th class="px-5 py-3">Name</th>
-                    <th class="px-5 py-3">Service</th>
-                    <th class="px-5 py-3">Preferred date</th>
-                    <th class="px-5 py-3">Status</th>
-                    <th class="px-5 py-3">Received</th>
-                    <th class="px-5 py-3"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-ink-900/10 dark:divide-linen-100/10">
-                @forelse ($this->requests as $request)
-                    <tr
-                        wire:key="request-{{ $request->id }}"
-                        wire:click="viewRequest({{ $request->id }})"
-                        class="hover:bg-ink-900/[0.02] dark:hover:bg-linen-100/[0.03] cursor-pointer"
-                    >
-                        <td class="px-5 py-3.5">
-                            <p class="font-medium">{{ $request->full_name }}</p>
-                            <p class="font-mono text-xs text-ink-900/45 dark:text-linen-100/45">{{ $request->email }}</p>
-                        </td>
-                        <td class="px-5 py-3.5">{{ $request->service?->name ?? '—' }}</td>
-                        <td class="px-5 py-3.5 font-mono text-xs">{{ $request->preferred_date?->format('M d, Y') ?? '—' }}</td>
-                        <td class="px-5 py-3.5">
-                            <span class="inline-flex px-2.5 py-1 rounded-full text-[11px] font-mono capitalize {{ match ($request->status) {
-                                'new' => 'bg-copper-500/15 text-copper-600 dark:text-copper-300',
-                                'contacted' => 'bg-ink-900/8 dark:bg-linen-100/10 text-ink-900/60 dark:text-linen-100/60',
-                                'quoted' => 'bg-ink-900/8 dark:bg-linen-100/10 text-ink-900/60 dark:text-linen-100/60',
-                                'won' => 'bg-sage-500/15 text-sage-600 dark:text-sage-400',
-                                'lost' => 'bg-danger-500/15 text-danger-600 dark:text-danger-400',
-                            } }}">{{ $request->status }}</span>
-                        </td>
-                        <td class="px-5 py-3.5 font-mono text-xs text-ink-900/50 dark:text-linen-100/50">{{ $request->created_at->diffForHumans() }}</td>
-                        <td class="px-5 py-3.5 text-right">
-                            <svg class="w-4 h-4 inline text-ink-900/30 dark:text-linen-100/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="6" class="text-center text-sm text-ink-900/50 dark:text-linen-100/50 py-12">No quote requests with this status.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    #[Computed]
+    public function services()
+    {
+        return Service::featured()->ordered()->get();
+    }
 
-    {{-- Mobile stacked cards --}}
-    <div class="md:hidden space-y-3">
-        @forelse ($this->requests as $request)
-            <button
-                type="button"
-                wire:key="request-card-{{ $request->id }}"
-                wire:click="viewRequest({{ $request->id }})"
-                class="w-full text-left rounded-md border border-ink-900/10 dark:border-linen-100/10 bg-white dark:bg-ink-900/40 p-4"
-            >
-                <div class="flex items-start justify-between gap-2">
-                    <div>
-                        <p class="font-medium text-sm">{{ $request->full_name }}</p>
-                        <p class="font-mono text-xs text-ink-900/45 dark:text-linen-100/45">{{ $request->service?->name ?? '—' }}</p>
-                    </div>
-                    <span class="inline-flex px-2 py-1 rounded-full text-[10px] font-mono capitalize shrink-0 {{ match ($request->status) {
-                        'new' => 'bg-copper-500/15 text-copper-600 dark:text-copper-300',
-                        'contacted' => 'bg-ink-900/8 dark:bg-linen-100/10 text-ink-900/60 dark:text-linen-100/60',
-                        'quoted' => 'bg-ink-900/8 dark:bg-linen-100/10 text-ink-900/60 dark:text-linen-100/60',
-                        'won' => 'bg-sage-500/15 text-sage-600 dark:text-sage-400',
-                        'lost' => 'bg-danger-500/15 text-danger-600 dark:text-danger-400',
-                    } }}">{{ $request->status }}</span>
+    public function continueToDetails(): void
+    {
+        $this->validate(['serviceId' => ['required', 'exists:services,id']]);
+        $this->step = 2;
+    }
+
+    public function continueToContact(): void
+    {
+        $this->validate([
+            'preferredDate' => ['nullable', '   date', 'after_or_equal:today'],
+            'details' => ['required', 'string', 'min:10', 'max:5000'],
+        ]);
+        $this->step = 3;
+    }
+
+    public function submitQuote(): void
+    {
+        $validated = $this->validate([
+            'serviceId' => ['required', 'exists:services,id'],
+            'preferredDate' => ['nullable', 'date', 'after_or_equal:today'],
+            'details' => ['required', 'string', 'min:10', 'max:5000'],
+            'fullName' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:50'],
+            'email' => ['required', 'email', 'max:255'],
+        ]);
+
+        QuoteRequest::create([
+            'service_id' => $validated['serviceId'],
+            'preferred_date' => $validated['preferredDate'] ?: null,
+            'details' => $validated['details'],
+            'full_name' => $validated['fullName'],
+            'phone' => $validated['phone'],
+            'email' => $validated['email'],
+            'status' => 'new',
+        ]);
+
+        $this->submitted = true;
+    }
+
+    public function resetForm(): void
+    {
+        $this->reset();
+        $this->step = 1;
+    }
+}; ?>
+
+<div>
+    {{-- Hero --}}
+    <section class="bg-linen-100 dark:bg-ink-900/40 border-b border-ink-900/10 dark:border-linen-100/10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-14 sm:pt-20 sm:pb-20 text-center">
+            <p class="font-mono text-xs uppercase tracking-widest text-copper-600 dark:text-copper-300 mb-3">New Entry
+            </p>
+            <h1 class="font-display font-semibold text-3xl sm:text-4xl lg:text-5xl tracking-tight">Book a service or
+                request a quote</h1>
+            <p class="mt-4 text-ink-900/65 dark:text-linen-100/65 max-w-2xl mx-auto text-base sm:text-lg">We route it
+                to the right division and reply within one business day.</p>
+        </div>
+    </section>
+
+    <section class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+        {{-- Progress --}}
+        <ol class="flex items-center justify-between mb-10" aria-label="Quote request progress">
+            @foreach ([1 => 'The service', 2 => 'The details', 3 => 'Your contact'] as $number => $label)
+                <li class="flex-1 flex items-center">
+                    <span
+                        class="w-8 h-8 rounded-full grid place-items-center text-xs font-mono font-bold shrink-0 {{ $step >= $number ? 'bg-ink-900 dark:bg-copper-500 text-linen-50 dark:text-ink-950' : 'bg-ink-900/10 text-ink-900/40 dark:bg-linen-100/10 dark:text-linen-100/40' }}">
+                        {{ str_pad((string) $number, 2, '0', STR_PAD_LEFT) }}
+                    </span>
+                    @if ($number < 3)
+                        <span
+                            class="h-px flex-1 mx-2 {{ $step > $number ? 'bg-copper-500' : 'bg-ink-900/10 dark:bg-linen-100/10' }}"></span>
+                    @endif
+                </li>
+            @endforeach
+        </ol>
+
+        @if ($submitted)
+            <div class="rounded-md border-2 border-sage-500 bg-sage-500/10 p-6 sm:p-8" role="status">
+                <p class="font-mono text-xs uppercase tracking-widest text-sage-600 dark:text-sage-500 mb-2">Entry
+                    filed</p>
+                <h2 class="font-display font-semibold text-2xl">Your request is on record.</h2>
+                <p class="mt-3 text-sm text-ink-900/70 dark:text-linen-100/70">Thank you, {{ $fullName }}. Our team
+                    will review the details and contact you within one business day.</p>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <a href="{{ route('website.home') }}" wire:navigate
+                        class="rounded-md bg-ink-900 dark:bg-copper-500 text-linen-50 dark:text-ink-950 font-semibold px-5 py-3 text-sm">Back
+                        to home</a>
+                    <button type="button" wire:click="resetForm"
+                        class="rounded-md border border-ink-900/20 dark:border-linen-100/20 font-semibold px-5 py-3 text-sm">File
+                        another request</button>
                 </div>
-                <p class="font-mono text-[11px] text-ink-900/40 dark:text-linen-100/40 mt-3">{{ $request->created_at->diffForHumans() }}</p>
-            </button>
-        @empty
-            <p class="text-center text-sm text-ink-900/50 dark:text-linen-100/50 py-12">No quote requests with this status.</p>
-        @endforelse
-    </div>
-
-    {{ $this->requests->links() }}
-
-    <x-forms.panel name="quote-detail">
-        @if ($this->viewingRequest)
-            <div class="flex items-center justify-between px-5 py-4 border-b border-ink-900/10 dark:border-linen-100/10 sticky top-0 bg-linen-50 dark:bg-ink-950">
-                <h2 class="font-display font-semibold">Quote request</h2>
-                <button type="button" @click="close()" class="w-9 h-9 grid place-items-center rounded-md hover:bg-ink-900/5 dark:hover:bg-linen-100/10" aria-label="Close">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
             </div>
+        @else
+            <div class="rounded-md border border-ink-900/12 dark:border-linen-100/12 p-6 sm:p-8">
 
-            <div class="p-5 space-y-5">
-                <div>
-                    <p class="font-display font-semibold text-lg">{{ $this->viewingRequest->full_name }}</p>
-                    <p class="font-mono text-xs text-ink-900/50 dark:text-linen-100/50">{{ $this->viewingRequest->email }}</p>
-                    <p class="font-mono text-xs text-ink-900/50 dark:text-linen-100/50">{{ $this->viewingRequest->phone }}</p>
-                </div>
+                {{-- Step 1 --}}
+                @if ($step === 1)
+                    <h2 class="font-display font-semibold text-xl mb-5">1. What do you need?</h2>
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        @foreach ($this->services as $service)
+                            <label wire:key="quote-service-{{ $service->id }}"
+                                class="flex items-center gap-3 rounded-md border px-4 py-3 cursor-pointer transition-colors {{ $serviceId === $service->id ? 'border-copper-500 bg-copper-500/5' : 'border-ink-900/12 dark:border-linen-100/12' }}">
+                                <input type="radio" wire:model="serviceId" value="{{ $service->id }}"
+                                    class="accent-copper-500">
+                                <span class="text-sm font-medium">{{ $service->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('serviceId')
+                        <p class="mt-3 text-xs text-danger-500">{{ $message }}</p>
+                    @enderror
+                    <button type="button" wire:click="continueToDetails"
+                        class="mt-8 w-full sm:w-auto rounded-md bg-ink-900 dark:bg-copper-500 text-linen-50 dark:text-ink-950 font-semibold px-7 py-3 text-sm">Continue</button>
 
-                <div>
-                    <p class="font-mono text-[10px] uppercase tracking-widest text-ink-900/40 dark:text-linen-100/40 mb-1">Service</p>
-                    <p class="text-sm">{{ $this->viewingRequest->service?->name ?? '—' }}</p>
-                </div>
-
-                <div>
-                    <p class="font-mono text-[10px] uppercase tracking-widest text-ink-900/40 dark:text-linen-100/40 mb-1">Preferred date</p>
-                    <p class="text-sm font-mono">{{ $this->viewingRequest->preferred_date?->format('M d, Y') ?? 'Not specified' }}</p>
-                </div>
-
-                <div>
-                    <p class="font-mono text-[10px] uppercase tracking-widest text-ink-900/40 dark:text-linen-100/40 mb-1">Details</p>
-                    <p class="text-sm leading-relaxed whitespace-pre-line">{{ $this->viewingRequest->details ?? '—' }}</p>
-                </div>
-
-                <form wire:submit="saveRequest" class="space-y-4 pt-2 border-t border-ink-900/10 dark:border-linen-100/10">
-                    <div class="flex flex-col gap-1.5">
-                        <label for="viewingStatus" class="font-mono text-[10px] uppercase tracking-widest text-ink-900/40 dark:text-linen-100/40">Status</label>
-                        <select wire:model="viewingStatus" id="viewingStatus" class="w-full rounded-md border border-ink-900/15 dark:border-linen-100/15 bg-white dark:bg-ink-900/40 px-3 py-2 text-sm capitalize focus:outline-none focus:ring-2 focus:ring-copper-500">
-                            <option value="new">New</option>
-                            <option value="contacted">Contacted</option>
-                            <option value="quoted">Quoted</option>
-                            <option value="won">Won</option>
-                            <option value="lost">Lost</option>
-                        </select>
+                    {{-- Step 2 --}}
+                @elseif ($step === 2)
+                    <h2 class="font-display font-semibold text-xl mb-5">2. Describe the job</h2>
+                    <div class="space-y-5">
+                        <div>
+                            <label for="preferred-date" class="text-sm font-medium block mb-1.5">Preferred
+                                date</label>
+                            <input id="preferred-date" type="date" wire:model="preferredDate"
+                                min="{{ now()->format('Y-m-d') }}"
+                                class="w-full rounded-md border border-ink-900/15 dark:border-linen-100/15 bg-transparent px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-copper-500">
+                            @error('preferredDate')
+                                <p class="mt-1 text-xs text-danger-500">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label for="quote-details" class="text-sm font-medium block mb-1.5">Details</label>
+                            <textarea id="quote-details" wire:model="details" rows="4"
+                                placeholder="e.g. We need a mobile-first website for a fashion retailer, with WhatsApp checkout and a simple product catalogue."
+                                class="w-full rounded-md border border-ink-900/15 dark:border-linen-100/15 bg-transparent px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-copper-500"></textarea>
+                            @error('details')
+                                <p class="mt-1 text-xs text-danger-500">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mt-8">
+                        <button type="button" wire:click="$set('step', 1)"
+                            class="rounded-md border border-ink-900/20 dark:border-linen-100/20 font-semibold px-6 py-3 text-sm">Back</button>
+                        <button type="button" wire:click="continueToContact"
+                            class="rounded-md bg-ink-900 dark:bg-copper-500 text-linen-50 dark:text-ink-950 font-semibold px-7 py-3 text-sm">Continue</button>
                     </div>
 
-                    <div class="flex flex-col gap-1.5">
-                        <label for="viewingNotes" class="font-mono text-[10px] uppercase tracking-widest text-ink-900/40 dark:text-linen-100/40">Internal notes</label>
-                        <textarea
-                            wire:model="viewingNotes"
-                            id="viewingNotes"
-                            rows="3"
-                            placeholder="Not visible to the client…"
-                            class="w-full rounded-md border border-ink-900/15 dark:border-linen-100/15 bg-white dark:bg-ink-900/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-copper-500"
-                        ></textarea>
-                    </div>
-
-                    <x-forms.button type="submit" variant="primary" class="w-full">Save</x-forms.button>
-                </form>
+                    {{-- Step 3 --}}
+                @else
+                    <h2 class="font-display font-semibold text-xl mb-5">3. Your contact information</h2>
+                    <form wire:submit="submitQuote">
+                        <div class="grid sm:grid-cols-2 gap-5">
+                            <div>
+                                <label for="quote-name" class="text-sm font-medium block mb-1.5">Full name</label>
+                                <input id="quote-name" wire:model="fullName" required type="text"
+                                    class="w-full rounded-md border border-ink-900/15 dark:border-linen-100/15 bg-transparent px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-copper-500">
+                                @error('fullName')
+                                    <p class="mt-1 text-xs text-danger-500">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="quote-phone" class="text-sm font-medium block mb-1.5">Phone
+                                    number</label>
+                                <input id="quote-phone" wire:model="phone" required type="tel"
+                                    class="w-full rounded-md border border-ink-900/15 dark:border-linen-100/15 bg-transparent px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-copper-500">
+                                @error('phone')
+                                    <p class="mt-1 text-xs text-danger-500">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="mt-5">
+                            <label for="quote-email" class="text-sm font-medium block mb-1.5">Email address</label>
+                            <input id="quote-email" wire:model="email" required type="email"
+                                class="w-full rounded-md border border-ink-900/15 dark:border-linen-100/15 bg-transparent px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-copper-500">
+                            @error('email')
+                                <p class="mt-1 text-xs text-danger-500">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="flex gap-3 mt-8">
+                            <button type="button" wire:click="$set('step', 2)"
+                                class="rounded-md border border-ink-900/20 dark:border-linen-100/20 font-semibold px-6 py-3 text-sm">Back</button>
+                            <button type="submit" wire:loading.attr="disabled"
+                                class="rounded-md bg-copper-500 hover:bg-copper-600 disabled:opacity-50 text-linen-50 font-semibold px-7 py-3 text-sm inline-flex items-center gap-2">
+                                <svg wire:loading wire:target="submitQuote" class="animate-spin w-4 h-4"
+                                    viewBox="0 0 24 24" fill="none">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                        stroke="currentColor" stroke-width="4" />
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                </svg>
+                                <span wire:loading.remove wire:target="submitQuote">Submit request</span>
+                                <span wire:loading wire:target="submitQuote">Submitting…</span>
+                            </button>
+                        </div>
+                    </form>
+                @endif
             </div>
         @endif
-    </x-forms.panel>
+    </section>
 </div>

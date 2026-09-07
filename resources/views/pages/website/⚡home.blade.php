@@ -25,7 +25,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
     #[Computed]
     public function services(): Collection
     {
-        return Service::ordered()->take(8)->get();
+        return Service::featured()->ordered()->get();
     }
 
     public function getServiceIconSvg($code)
@@ -144,13 +144,13 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                     Register of Divisions</p>
 
                 <div role="tablist" aria-label="Business divisions">
-                    @foreach ($divisions as $i => $division)
+                    @foreach ($this->services as $i => $service)
                         <button type="button" @click="active = {{ $i }}" role="tab"
                             :aria-pressed="active === {{ $i }}"
                             class="entry-row w-full flex items-center gap-4 text-left px-5 py-3.5 border-l-4 border-transparent border-t border-ink-900/10 dark:border-linen-100/10 first:border-t-0 hover:bg-ink-900/[0.03] dark:hover:bg-linen-100/[0.05] transition-colors">
                             <span
-                                class="font-mono text-xs text-copper-600 dark:text-copper-300 w-6 shrink-0">{{ $division['code'] }}</span>
-                            <span class="text-sm font-medium flex-1">{{ $division['name'] }}</span>
+                                class="font-mono text-xs text-copper-600 dark:text-copper-300 w-6 shrink-0">{{ $service->code }}</span>
+                            <span class="text-sm font-medium flex-1">{{ $service->name }}</span>
                             <svg class="w-4 h-4 shrink-0 text-ink-900/30 dark:text-linen-100/30"
                                 :class="active === {{ $i }} ? 'rotate-90 text-copper-500' : ''"
                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -160,14 +160,14 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                     @endforeach
                 </div>
 
-                @foreach ($divisions as $i => $division)
+                @foreach ($this->services as $i => $service)
                     <div x-show="active === {{ $i }}" x-cloak
                         class="p-6 bg-ink-900 dark:bg-linen-100/[0.06] text-linen-50 min-h-[150px]">
                         <div class="flex items-center gap-2 mb-3"><span class="text-sage-500">✓</span><span
                                 class="font-mono text-[10px] uppercase tracking-widest text-sage-500">Verified
                                 division</span></div>
-                        <h3 class="font-display font-semibold text-lg">{{ $division['name'] }}</h3>
-                        <p class="text-linen-100/75 text-sm mt-2 leading-relaxed">{{ $division['description'] }}</p>
+                        <h3 class="font-display font-semibold text-lg">{{ $service->name }}</h3>
+                        <p class="text-linen-100/75 text-sm mt-2 leading-relaxed">{{ $service->description }}</p>
                     </div>
                 @endforeach
             </div>
