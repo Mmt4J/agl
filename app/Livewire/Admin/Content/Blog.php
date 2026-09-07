@@ -185,6 +185,8 @@ class Blog extends Component
             'readTimeMinutes' => ['required', 'integer', 'min:1'],
             'status' => ['required', 'in:draft,published'],
             'publishedAt' => ['nullable', 'date'],
+            'selectedTagIds' => ['array'],
+            'selectedTagIds.*' => ['integer', 'exists:tags,id'],
         ]);
 
         $post = $this->postId ? BlogPost::findOrFail($this->postId) : new BlogPost();
@@ -206,7 +208,7 @@ class Blog extends Component
             'published_at' => $publishedAt,
         ])->save();
 
-        $post->tags()->sync($this->selectedTagIds);
+        $post->tags()->sync($validated['selectedTagIds'] ?? []);
 
         $this->resetPage('postsPage');
 

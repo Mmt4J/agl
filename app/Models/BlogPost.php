@@ -53,6 +53,7 @@ class BlogPost extends Model
     public function related(int $limit = 2)
     {
         return static::published()
+            ->with('category')
             ->where('blog_category_id', $this->blog_category_id)
             ->where('id', '!=', $this->id)
             ->limit($limit)
