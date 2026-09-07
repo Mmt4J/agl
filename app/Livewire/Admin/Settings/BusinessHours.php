@@ -37,6 +37,29 @@ class BusinessHours extends Component
     {
         $this->justSaved = false;
 
+        $rules = [];
+        $attributes = [];
+
+        foreach (array_keys($this->hours) as $day) {
+            $isClosed = $this->hours[$day]['is_closed'];
+
+            $rules["hours.{$day}.is_closed"] = ['boolean'];
+            $rules["hours.{$day}.opens_at"] = [
+                $isClosed ? 'nullable' : 'required',
+                'date_format:H:i',
+            ];
+            $rules["hours.{$day}.closes_at"] = [
+                $isClosed ? 'nullable' : 'required',
+                'date_format:H:i',
+                "different:hours.{$day}.opens_at",
+            ];
+
+            $attributes["hours.{$day}.opens_at"] = $this->dayLabels()[$day] . ' opening time';
+            $attributes["hours.{$day}.closes_at"] = $this->dayLabels()[$day] . ' closing time';
+        }
+
+        $this->validate($rules, [], $attributes);
+
         foreach ($this->hours as $day => $data) {
             BusinessHour::updateOrCreate(
                 ['day_of_week' => $day],
@@ -54,16 +77,21 @@ class BusinessHours extends Component
         $this->justSaved = true;
     }
 
+    private function dayLabels(): array
+    {
+        return [
+            0 => 'Sunday', 1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday',
+            4 => 'Thursday', 5 => 'Friday', 6 => 'Saturday',
+        ];
+    }
+
     public function render()
     {
         return view('livewire.admin.settings.business-hours', [
             // Monday(1)..Saturday(6), then Sunday(0) last - natural week
             // reading order, independent of the DB's Sunday-first storage.
             'dayOrder' => [1, 2, 3, 4, 5, 6, 0],
-            'dayLabels' => [
-                0 => 'Sunday', 1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday',
-                4 => 'Thursday', 5 => 'Friday', 6 => 'Saturday',
-            ],
+            'dayLabels' => $this->dayLabels(),
         ]);
     }
 }

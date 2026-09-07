@@ -23,6 +23,18 @@ class BusinessHour extends Model
             return false;
         }
 
-        return $now->format('H:i:s') >= $today->opens_at && $now->format('H:i:s') < $today->closes_at;
+        $opensAt = $now->copy()->setTimeFromTimeString($today->opens_at);
+        $closesAt = $now->copy()->setTimeFromTimeString($today->closes_at);
+
+        // Overnight span (e.g. opens 18:00, closes 02:00): closing time
+        // is numerically "before" opening time on the same calendar day,
+        // so the open window wraps past midnight. In that case we're
+        // open if we're at/after opening OR still before closing -
+        // rather than requiring both, which is what a same-day span needs.
+        if ($closesAt->lessThanOrEqualTo($opensAt)) {
+            return $now->greaterThanOrEqualTo($opensAt) || $now->lessThan($closesAt);
+        }
+
+        return $now->greaterThanOrEqualTo($opensAt) && $now->lessThan($closesAt);
     }
 }
