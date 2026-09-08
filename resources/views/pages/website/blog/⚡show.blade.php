@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\BlogPost;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -13,7 +14,31 @@ new #[Layout('layouts::website')] class extends Component {
         abort_unless($post->status === 'published' && $post->published_at?->isPast(), 404);
 
         $this->postId = $post->id;
-        $post->increment('view_count');
+
+        $this->registerView($post);
+    }
+
+    protected function registerView(BlogPost $post): void
+    {
+        // Skip obvious crawlers/bots so they don't inflate the count.
+        if ($this->isBot()) {
+            return;
+        }
+
+        $key = 'post_view:' . $post->id . ':' . sha1(request()->ip());
+
+        // Only increments once per visitor per post, per 24h window.
+        if (!Cache::has($key)) {
+            Cache::put($key, true, now()->addDay());
+            $post->increment('view_count');
+        }
+    }
+
+    protected function isBot(): bool
+    {
+        $agent = strtolower((string) request()->userAgent());
+
+        return $agent === '' || str_contains($agent, 'bot') || str_contains($agent, 'crawl') || str_contains($agent, 'spider') || str_contains($agent, 'facebookexternalhit') || str_contains($agent, 'preview');
     }
 
     #[Computed]
