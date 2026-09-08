@@ -3,6 +3,7 @@
 use App\Models\Service;
 use App\Models\Setting;
 use App\Models\Testimonial;
+use App\Livewire\Concerns\HasNumberInWords;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -10,6 +11,8 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new #[Layout('layouts::website')] #[Title('About')] class extends Component {
+    use HasNumberInWords;
+
     public function companySettings(): array
     {
         $settings = Setting::whereIn('key', ['company.rc_number', 'company.scuml_number', 'company.address'])->pluck('value', 'key');
@@ -31,6 +34,11 @@ new #[Layout('layouts::website')] #[Title('About')] class extends Component {
     public function testimonials(): Collection
     {
         return Testimonial::approved()->take(3)->get();
+    }
+
+    public function getDivisionCountInWordsProperty()
+    {
+        return $this->numberInWords(count($this->featuredServices()));
     }
 }; ?>
 
@@ -61,7 +69,12 @@ new #[Layout('layouts::website')] #[Title('About')] class extends Component {
         <div>
             <p class="font-mono text-xs uppercase tracking-widest text-copper-600 dark:text-copper-300 mb-3">Why the
                 company exists</p>
-            <h2 class="font-display font-semibold text-3xl sm:text-4xl">Seven trades, one standard of care.</h2>
+            <h2 class="font-display font-semibold text-3xl sm:text-4xl">{{ ucfirst($this->divisionCountInWords) }} plus
+                trades, one
+                standard of care.</h2>
+            <a href="{{ route('website.services') }}" wire:navigate
+                class="font-semibold text-sm underline decoration-copper-500 decoration-2 underline-offset-4">See
+                all services →</a>
         </div>
         <div class="space-y-5 text-ink-900/70 dark:text-linen-100/70 leading-relaxed">
             <p>Small businesses should not have to choose between a specialist who disappears after payment and a large

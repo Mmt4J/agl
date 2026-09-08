@@ -49,7 +49,7 @@ new #[Layout('layouts::website')] #[Title('Industries')] class extends Component
                 <div>
                     <p class="font-mono text-xs uppercase tracking-widest text-copper-600 dark:text-copper-300 mb-2">Field
                         register</p>
-                    <h2 class="font-display font-semibold text-3xl sm:text-4xl">Who we build for</h2>
+                    <h2 class="font-display font-semibold text-3xl sm:text-4xl">Who we serve & build for</h2>
                 </div>
                 <span
                     class="self-start sm:self-auto font-mono text-xs text-ink-900/45 dark:text-linen-100/45">{{ $this->industries->count() }}

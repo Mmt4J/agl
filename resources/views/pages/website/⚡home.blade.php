@@ -4,6 +4,7 @@ use App\Models\PortfolioProject;
 use App\Models\Service;
 use App\Models\Setting;
 use App\Models\Testimonial;
+use App\Livewire\Concerns\HasNumberInWords;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -12,6 +13,8 @@ use Livewire\Component;
 
 new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
     // No Division model exists in the schema, so the registry index remains static.
+    use HasNumberInWords;
+
     public array $divisions = [
         ['code' => '01', 'name' => 'Electronics', 'description' => 'Repairs and sales for phones, laptops, and home appliances - genuine parts, honest diagnostics.'],
         ['code' => '02', 'name' => 'Software', 'description' => 'Custom software built for real Nigerian business workflows, from POS systems to internal tools.'],
@@ -78,9 +81,7 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
 
     public function getDivisionCountInWordsProperty()
     {
-        $divisionInWord = new \NumberFormatter('en', \NumberFormatter::SPELLOUT);
-
-        return $divisionInWord->format(count($this->services()));
+        return $this->numberInWords(count($this->services()));
     }
 }; ?>
 
@@ -117,7 +118,8 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                         <dt
                             class="font-mono text-[10px] uppercase tracking-widest text-ink-900/50 dark:text-linen-100/50">
                             Divisions</dt>
-                        <dd class="font-display font-semibold text-2xl mt-1">{{ count($this->services()) }}</dd>
+                        <dd class="font-display font-semibold text-2xl mt-1">{{ ucfirst($this->divisionCountInWords) }}
+                        </dd>
                     </div>
                     <div class="pt-4 px-4">
                         <dt
@@ -323,10 +325,14 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                     Certificate of record</p>
                 <h2 class="font-display font-semibold text-3xl sm:text-4xl mb-5">A registered partner, not a side
                     hustle</h2>
-                <p class="text-ink-900/70 dark:text-linen-100/70 leading-relaxed mb-6">Founded by Matthew Ayodele Alabi
-                    and Samuel Gift Alabi, ANESMAVISA GLOBAL LTD was incorporated in March 2026 as a private company
-                    limited by shares, and registered with SCUML two months later. We consolidate services individuals
-                    and small businesses usually source from six unregistered vendors.</p>
+                <p class="text-ink-900/70 dark:text-linen-100/70 leading-relaxed mb-6">Founded by Matthew
+                    and Samuel Alabi, ANESMAVISA GLOBAL LTD was incorporated in March 2026 as a private company
+                    limited by shares and registered with SCUML two months later.
+
+                    We bring together essential services that individuals and small businesses would otherwise have to
+                    source from multiple unregistered vendors—providing a more convenient, reliable, and professional
+                    experience in one place.
+                </p>
                 <dl class="grid grid-cols-2 gap-5">
                     <div class="border-l-2 border-copper-500 pl-3">
                         <dt class="font-semibold text-sm">CAC Registered</dt>

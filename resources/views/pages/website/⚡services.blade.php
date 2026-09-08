@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Service;
+use App\Livewire\Concerns\HasNumberInWords;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -8,10 +9,12 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new #[Layout('layouts::website')] #[Title('Services')] class extends Component {
+    use HasNumberInWords;
+
     #[Computed]
     public function services(): Collection
     {
-        return Service::with('features')->ordered()->get();
+        return Service::featured()->with('features')->ordered()->get();
     }
 
     public function getServiceIconSvg($code)
@@ -38,6 +41,11 @@ new #[Layout('layouts::website')] #[Title('Services')] class extends Component {
 
         return $icons[$code] ?? $fallback;
     }
+
+    public function getDivisionCountInWordsProperty()
+    {
+        return $this->numberInWords(count($this->services()));
+    }
 }; ?>
 
 <div>
@@ -49,7 +57,7 @@ new #[Layout('layouts::website')] #[Title('Services')] class extends Component {
             <p class="font-mono text-xs uppercase tracking-widest text-copper-600 dark:text-copper-300 mb-3">Schedule A
             </p>
             <h1 class="font-display font-semibold text-3xl sm:text-4xl lg:text-5xl tracking-tight">
-                Seven divisions, one point of contact
+                {{ ucfirst($this->divisionCountInWords) }} divisions, one point of contact
             </h1>
 
             <p class="mt-4 text-ink-900/65 dark:text-linen-100/65 max-w-2xl mx-auto text-base sm:text-lg">
