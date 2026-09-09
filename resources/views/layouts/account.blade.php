@@ -43,6 +43,12 @@
                     {{ __('Settings') }}
                 </a>
 
+                <a href="{{ route('admin.overview') }}" wire:navigate
+                    class="text-sm text-ink-700 dark:text-linen-200 hover:text-ink-950 dark:hover:text-linen-50
+                              data-current:text-copper-600 dark:data-current:text-copper-300 data-current:font-medium">
+                    {{ __('Admin') }}
+                </a>
+
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <x-forms.button variant="ghost" type="submit" class="text-sm" data-test="logout-button">

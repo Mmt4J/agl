@@ -80,6 +80,11 @@
                         {{ ucfirst(auth()->user()->role) }} · {{ auth()->user()->email }}</p>
                 </div>
 
+                <a href="{{ route('profile.edit') }}" wire:navigate
+                    class="block px-4 py-2.5 hover:bg-ink-900/5 dark:hover:bg-linen-100/5 text-ink-900 dark:text-linen-100">
+                    Manage Profile
+                </a>
+
                 <a href="{{ route('admin.settings.company') }}" wire:navigate
                     class="block px-4 py-2.5 hover:bg-ink-900/5 dark:hover:bg-linen-100/5 text-ink-900 dark:text-linen-100">
                     Company settings
