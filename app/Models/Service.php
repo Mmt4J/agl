@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Database\Factories\ServiceFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/** @use HasFactory<ServiceFactory> */
 class Service extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'code', 'name', 'slug', 'short_description', 'blurb',
