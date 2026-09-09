@@ -14,43 +14,72 @@
         @endif
     </button>
 
+    {{-- Mobile scrim: on small screens the tray becomes a fixed sheet (below),
+         so a scrim behind it keeps it visually separated from page content
+         instead of appearing to overlap it. --}}
+    <div x-show="notifOpen" x-cloak x-transition.opacity class="sm:hidden fixed inset-0 z-30 bg-ink-950/20"
+        @click="notifOpen = false"></div>
+
+    {{--
+        FIX: the old markup put the "Notifications" label and all 4 filter
+        tabs on a single `justify-between` row inside a fixed w-80 box with
+        `overflow-hidden`. That's more text than 320px can hold, and because
+        the parent clips overflow instead of scrolling it, the last tab
+        ("Newsletter") got visually cut off to "News1" — that was the bug,
+        not a data/wire issue.
+
+        Fix: label and tabs are now stacked on separate rows, and the tab
+        row is its own horizontally-scrollable strip, so it can never clip
+        a label again regardless of viewport width. On mobile the tray is
+        `fixed` under the header (like the search dropdown pattern) instead
+        of an `absolute` dropdown, so it can't collide with page content.
+    --}}
     <div x-cloak x-show="notifOpen" x-transition
-        class="absolute right-0 mt-2 w-80 max-w-[90vw] rounded-md border border-ink-900/10 dark:border-linen-100/10 bg-white dark:bg-ink-900 shadow-xl overflow-hidden">
-        <div class="flex items-center justify-between px-4 pt-3 pb-2">
+        class="z-40 fixed inset-x-3 top-16 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2
+               w-auto sm:w-96 max-h-[75vh] sm:max-h-[28rem]
+               flex flex-col rounded-md border border-ink-900/10 dark:border-linen-100/10 bg-white dark:bg-ink-900 shadow-xl overflow-hidden">
+
+        <div class="shrink-0 px-4 pt-3 pb-2">
             <p class="font-mono text-[10px] uppercase tracking-widest text-ink-900/50 dark:text-linen-100/50">
                 Notifications</p>
-            <div class="flex gap-1">
-                @foreach ([['value' => 'all', 'label' => 'All'], ['value' => 'quotes', 'label' => 'Quotes'], ['value' => 'messages', 'label' => 'Messages'], ['value' => 'subscribers', 'label' => 'Newsletter']] as $tab)
-                    <button type="button" wire:click="filterByType('{{ $tab['value'] }}')"
-                        class="font-mono text-[10px] px-2 py-0.5 rounded-full border transition-colors
-                            {{ $typeFilter === $tab['value']
-                                ? 'bg-copper-500 text-ink-950 border-copper-500'
-                                : 'border-ink-900/15 dark:border-linen-100/15 text-ink-900/60 dark:text-linen-100/60 hover:bg-ink-900/5 dark:hover:bg-linen-100/5' }}">
-                        {{ $tab['label'] }}
-                    </button>
-                @endforeach
-            </div>
         </div>
 
-        <ul class="max-h-80 overflow-y-auto divide-y divide-ink-900/10 dark:divide-linen-100/10">
+        <div class="shrink-0 flex items-center gap-1.5 px-4 pb-2 overflow-x-auto no-scrollbar">
+            @foreach ([['value' => 'all', 'label' => 'All'], ['value' => 'quotes', 'label' => 'Quotes'], ['value' => 'messages', 'label' => 'Messages'], ['value' => 'subscribers', 'label' => 'Newsletter']] as $tab)
+                <button type="button" wire:click="filterByType('{{ $tab['value'] }}')"
+                    class="shrink-0 whitespace-nowrap font-mono text-[10px] px-2.5 py-1 rounded-full border transition-colors
+                        {{ $typeFilter === $tab['value']
+                            ? 'bg-copper-500 text-ink-950 border-copper-500'
+                            : 'border-ink-900/15 dark:border-linen-100/15 text-ink-900/60 dark:text-linen-100/60 hover:bg-ink-900/5 dark:hover:bg-linen-100/5' }}">
+                    {{ $tab['label'] }}
+                </button>
+            @endforeach
+        </div>
+
+        <ul class="grow overflow-y-auto divide-y divide-ink-900/10 dark:divide-linen-100/10">
             @forelse ($this->items as $item)
                 <li wire:key="{{ $item['key'] }}">
                     <a href="{{ $item['url'] }}" wire:navigate @click="notifOpen = false"
                         class="flex items-start gap-3 px-4 py-3 hover:bg-ink-900/5 dark:hover:bg-linen-100/5">
-                        <span class="mt-1.5 w-2 h-2 rounded-full shrink-0 {{ $item['actionable'] ? 'bg-copper-500' : 'bg-transparent' }}"></span>
+                        <span
+                            class="mt-1.5 w-2 h-2 rounded-full shrink-0 {{ $item['actionable'] ? 'bg-copper-500' : 'bg-transparent' }}"></span>
                         <span class="min-w-0 flex-1">
-                            <span class="block text-sm truncate text-ink-950 dark:text-linen-50">{{ $item['title'] }}</span>
-                            <span class="block text-xs text-ink-900/50 dark:text-linen-100/50 truncate">{{ $item['meta'] }}</span>
-                            <span class="block font-mono text-[10px] text-ink-900/40 dark:text-linen-100/40 mt-0.5">{{ $item['time'] }}</span>
+                            <span
+                                class="block text-sm truncate text-ink-950 dark:text-linen-50">{{ $item['title'] }}</span>
+                            <span
+                                class="block text-xs text-ink-900/50 dark:text-linen-100/50 truncate">{{ $item['meta'] }}</span>
+                            <span
+                                class="block font-mono text-[10px] text-ink-900/40 dark:text-linen-100/40 mt-0.5">{{ $item['time'] }}</span>
                         </span>
                     </a>
                 </li>
             @empty
-                <li class="px-4 py-6 text-sm text-center text-ink-900/50 dark:text-linen-100/50">No {{ $typeFilter === 'all' ? '' : $typeFilter . ' ' }}notifications.</li>
+                <li class="px-4 py-6 text-sm text-center text-ink-900/50 dark:text-linen-100/50">No
+                    {{ $typeFilter === 'all' ? '' : $typeFilter . ' ' }}notifications.</li>
             @endforelse
         </ul>
 
-        <div class="border-t border-ink-900/10 dark:border-linen-100/10 p-2">
+        <div class="shrink-0 border-t border-ink-900/10 dark:border-linen-100/10 p-2">
             <button type="button" wire:click="markAllRead"
                 class="w-full text-center font-mono text-xs text-ink-900/60 dark:text-linen-100/60 hover:text-copper-600 dark:hover:text-copper-300 py-1.5 rounded-md hover:bg-ink-900/5 dark:hover:bg-linen-100/5 transition-colors">
                 Mark all as read
