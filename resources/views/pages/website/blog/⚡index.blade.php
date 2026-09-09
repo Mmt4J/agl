@@ -95,7 +95,7 @@ new #[Layout('layouts::website')] #[Title('The Journal')] class extends Componen
             aria-hidden="true"></div>
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
             <p class="font-mono text-xs uppercase tracking-[0.2em] text-copper-600 dark:text-copper-300 mb-5">The
-                Bulletin · File 07</p>
+                Bulletin</p>
             <div class="grid lg:grid-cols-12 gap-10 items-end">
                 <div class="lg:col-span-8">
                     <h1

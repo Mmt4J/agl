@@ -85,7 +85,7 @@ new #[Layout('layouts::website')] #[Title('Pricing')] class extends Component {
             <div class="grid md:grid-cols-3 gap-6">
                 @foreach ($this->selectedCategory->plans as $plan)
                     <div wire:key="pricing-plan-{{ $plan->id }}"
-                        class="rounded-md border p-7 flex flex-col {{ $plan->is_highlighted ? 'border-copper-500 border-2 bg-white dark:bg-ink-900/50' : 'border-ink-900/12 dark:border-linen-100/12 bg-white dark:bg-ink-900/40' }}">
+                        class="rounded-md border p-7 flex flex-col {{ $plan->is_highlighted ? 'border-copper-500 border-2 bg-white dark:bg-ink-900/50' : 'border-ink-900/12 dark:border-linen-100/12 bg-white dark:bg-ink-900/40 hover:border-copper-500/60' }}">
                         @if ($plan->is_highlighted)
                             <span
                                 class="font-mono text-[10px] uppercase tracking-widest text-copper-600 dark:text-copper-300 mb-2">Most
