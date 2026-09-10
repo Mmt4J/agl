@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Topbar;
 
 use App\Models\BlogPost;
 use App\Models\ContactMessage;
+use App\Models\CustomerMeasurement;
 use App\Models\Faq;
 use App\Models\NewsletterSubscriber;
 use App\Models\PortfolioProject;
@@ -39,6 +40,7 @@ class GlobalSearch extends Component
         'testimonials' => Testimonial::class,
         'plans' => PricingPlan::class,
         'subscribers' => NewsletterSubscriber::class,
+        'measurements' => CustomerMeasurement::class,
         'users' => User::class,
     ];
 
@@ -53,6 +55,7 @@ class GlobalSearch extends Component
         'testimonials' => 'admin.content.testimonials',
         'plans' => 'admin.content.pricing',
         'subscribers' => 'admin.leads.newsletter',
+        'measurements' => 'admin.measurements.records',
         'users' => 'admin.settings.users',
     ];
 
@@ -66,6 +69,7 @@ class GlobalSearch extends Component
         'testimonials' => 'Testimonials',
         'plans' => 'Pricing plans',
         'subscribers' => 'Newsletter',
+        'measurements' => 'Measurements',
         'users' => 'Users',
     ];
 
@@ -100,6 +104,12 @@ class GlobalSearch extends Component
             'testimonials' => Testimonial::where('client_name', 'like', $needle)->orWhere('quote', 'like', $needle)->limit(3)->get(['id', 'client_name'])->map(fn ($m) => ['key' => 'testimonial-'.$m->id, 'label' => $m->client_name, 'meta' => 'Testimonial', 'type' => 'testimonials']),
             'plans' => PricingPlan::where('name', 'like', $needle)->limit(3)->get(['id', 'name'])->map(fn ($m) => ['key' => 'plan-'.$m->id, 'label' => $m->name, 'meta' => 'Pricing', 'type' => 'plans']),
             'subscribers' => NewsletterSubscriber::where('email', 'like', $needle)->limit(3)->get(['id', 'email'])->map(fn ($m) => ['key' => 'subscriber-'.$m->id, 'label' => $m->email, 'meta' => 'Newsletter', 'type' => 'subscribers']),
+            'measurements' => CustomerMeasurement::where(function ($q) use ($needle) {
+                $q->where('customer_code', 'like', $needle)
+                    ->orWhere('full_name', 'like', $needle)
+                    ->orWhere('phone', 'like', $needle)
+                    ->orWhere('email', 'like', $needle);
+            })->limit(3)->get(['id', 'customer_code', 'full_name', 'phone'])->map(fn ($m) => ['key' => 'measurement-'.$m->id, 'label' => $m->full_name, 'meta' => $m->customer_code, 'type' => 'measurements']),
             'users' => User::where(function ($q) use ($needle) {
                 $q->where('name', 'like', $needle)->orWhere('email', 'like', $needle);
             })->limit(3)->get(['id', 'name', 'email'])->map(fn ($m) => ['key' => 'user-'.$m->id, 'label' => $m->name, 'meta' => $m->email, 'type' => 'users']),

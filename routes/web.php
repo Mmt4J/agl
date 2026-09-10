@@ -33,6 +33,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::livewire('/repair-pricing', 'admin.reference.repair-pricing')->name('repair-pricing');
     });
 
+    Route::prefix('measurements')->name('measurements.')->group(function () {
+        Route::livewire('/record-measurements/{record?}', 'admin.measurements.record-measurements')->name('record-measurements');
+        Route::livewire('/records', 'admin.measurements.records')->name('records');
+    });
+
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::livewire('/business-hours', 'admin.settings.business-hours')->name('business-hours');
         Route::livewire('/company', 'admin.settings.company')->name('company');
