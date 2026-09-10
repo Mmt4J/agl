@@ -74,8 +74,9 @@
                     </a>
                 </li>
             @empty
-                <li class="px-4 py-6 text-sm text-center text-ink-900/50 dark:text-linen-100/50">No
-                    {{ $typeFilter === 'all' ? '' : $typeFilter . ' ' }}notifications.</li>
+                <li class="px-4 py-6 text-sm text-center text-ink-900/50 dark:text-linen-100/50">
+                    {{ $typeFilter === 'all' ? 'No notifications.' : 'No ' . $typeFilter . '.' }}
+                </li>
             @endforelse
         </ul>
 
