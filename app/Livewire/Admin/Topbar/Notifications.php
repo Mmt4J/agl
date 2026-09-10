@@ -6,6 +6,7 @@ use App\Models\ContactMessage;
 use App\Models\NewsletterSubscriber;
 use App\Models\QuoteRequest;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -18,10 +19,11 @@ use Livewire\Component;
  * newsletter subscribers) rather than a static placeholder.
  *
  * Reads are tracked per-admin via a cache timestamp: every item created
- * after the admin's last "mark all read" is surfaced with a badge. No
- * separate notifications table is needed — the source data is the truth
- * and drops off naturally once its status changes (e.g. a message is
- * marked read, a quote is contacted).
+ * after the admin's last "mark all read" is surfaced (both the badge count
+ * and the tray list apply the same cutoff). No separate notifications table
+ * is needed — the source data is the truth and drops off naturally once its
+ * status changes (e.g. a message is marked read, a quote is contacted) or
+ * the admin marks everything read.
  */
 class Notifications extends Component
 {
@@ -32,7 +34,9 @@ class Notifications extends Component
     #[Computed]
     public function items(): Collection
     {
-        $quotes = QuoteRequest::query()
+        $lastRead = $this->lastReadAt();
+
+        $quotes = $this->unreadQuotes($lastRead)
             ->latest()
             ->limit(6)
             ->get(['id', 'full_name', 'email', 'status', 'created_at'])
@@ -45,10 +49,9 @@ class Notifications extends Component
                 'created_at' => $q->created_at,
                 'time' => $q->created_at->diffForHumans(),
                 'status' => $q->status,
-                'actionable' => in_array($q->status, ['new', 'contacted'], true),
             ]);
 
-        $messages = ContactMessage::query()
+        $messages = $this->unreadMessages($lastRead)
             ->latest()
             ->limit(6)
             ->get(['id', 'full_name', 'email', 'subject', 'status', 'created_at'])
@@ -61,10 +64,9 @@ class Notifications extends Component
                 'created_at' => $m->created_at,
                 'time' => $m->created_at->diffForHumans(),
                 'status' => $m->status,
-                'actionable' => $m->status === 'unread',
             ]);
 
-        $subscribers = NewsletterSubscriber::query()
+        $subscribers = $this->unreadSubscribers($lastRead)
             ->latest('subscribed_at')
             ->limit(4)
             ->get(['id', 'email', 'status', 'subscribed_at'])
@@ -77,7 +79,6 @@ class Notifications extends Component
                 'created_at' => $s->subscribed_at ?? $s->created_at,
                 'time' => ($s->subscribed_at ?? $s->created_at)->diffForHumans(),
                 'status' => $s->status,
-                'actionable' => $s->status === 'subscribed',
             ]);
 
         $items = $quotes->merge($messages)->merge($subscribers)
@@ -98,12 +99,9 @@ class Notifications extends Component
 
         $lastRead = $this->lastReadAt();
 
-        return QuoteRequest::where('created_at', '>', $lastRead)->whereIn('status', ['new', 'contacted'])->count()
-            + ContactMessage::where('created_at', '>', $lastRead)->where('status', 'unread')->count()
-            + NewsletterSubscriber::where(function ($q) use ($lastRead) {
-                $q->where('created_at', '>', $lastRead)
-                    ->orWhere('subscribed_at', '>', $lastRead);
-            })->where('status', 'subscribed')->count();
+        return $this->unreadQuotes($lastRead)->count()
+            + $this->unreadMessages($lastRead)->count()
+            + $this->unreadSubscribers($lastRead)->count();
     }
 
     public function filterByType(string $type): void
@@ -113,22 +111,52 @@ class Notifications extends Component
 
     public function markAllRead(): void
     {
-        Cache::forever($this->cacheKey(), now());
+        // Store a plain string, never a Carbon/DateTime object: serialized
+        // date payloads don't survive unserialization across PHP versions and
+        // come back as __PHP_Incomplete_Class, which would crash parse() on
+        // the next read (the reported live error was exactly that).
+        Cache::forever($this->cacheKey(), now()->toDateTimeString());
 
-        // The action re-renders the component, which immediately drives the
-        // badge (unreadCount) back down to zero without a page refresh.
+        // The action re-renders the component, which immediately drives both
+        // the badge (unreadCount) and the tray list (items) back down to
+        // empty, since every unread filter compares against the new cutoff.
         $this->dispatch('toast', message: 'Notifications marked as read.');
+    }
+
+    private function unreadQuotes(CarbonInterface $lastRead): Builder
+    {
+        return QuoteRequest::query()
+            ->where('created_at', '>', $lastRead)
+            ->whereIn('status', ['new', 'contacted']);
+    }
+
+    private function unreadMessages(CarbonInterface $lastRead): Builder
+    {
+        return ContactMessage::query()
+            ->where('created_at', '>', $lastRead)
+            ->where('status', 'unread');
+    }
+
+    private function unreadSubscribers(CarbonInterface $lastRead): Builder
+    {
+        return NewsletterSubscriber::query()
+            ->where(fn (Builder $q) => $q->where('created_at', '>', $lastRead)->orWhere('subscribed_at', '>', $lastRead))
+            ->where('status', 'subscribed');
     }
 
     private function lastReadAt(): CarbonInterface
     {
         $stored = Cache::get($this->cacheKey());
 
-        // The app may be configured with immutable dates, in which case
-        // `now()` yields a CarbonImmutable — not an Illuminate\Support\Carbon.
-        // The query builder accepts any CarbonInterface, so normalizing to
-        // one keeps the unread cutoff comparison reliable either way.
-        return $stored ? Carbon::parse($stored) : now()->subCenturies(1);
+        // Only a string is a valid cutoff. Anything else (a legacy date
+        // OBJECT written before the string fix — possibly unserialized as
+        // __PHP_Incomplete_Class) is ignored rather than parsed, so a stale
+        // or corrupted entry can never crash the component.
+        if (is_string($stored) && $stored !== '') {
+            return Carbon::parse($stored);
+        }
+
+        return now()->subCenturies(1);
     }
 
     private function cacheKey(): string

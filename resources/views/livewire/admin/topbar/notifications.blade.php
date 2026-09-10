@@ -61,8 +61,7 @@
                 <li wire:key="{{ $item['key'] }}">
                     <a href="{{ $item['url'] }}" wire:navigate @click="notifOpen = false"
                         class="flex items-start gap-3 px-4 py-3 hover:bg-ink-900/5 dark:hover:bg-linen-100/5">
-                        <span
-                            class="mt-1.5 w-2 h-2 rounded-full shrink-0 {{ $item['actionable'] ? 'bg-copper-500' : 'bg-transparent' }}"></span>
+                        <span class="mt-1.5 w-2 h-2 rounded-full shrink-0 bg-copper-500"></span>
                         <span class="min-w-0 flex-1">
                             <span
                                 class="block text-sm truncate text-ink-950 dark:text-linen-50">{{ $item['title'] }}</span>
