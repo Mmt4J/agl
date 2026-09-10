@@ -1,15 +1,16 @@
 <div class="space-y-4">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p class="text-sm text-ink-900/60 dark:text-linen-100/60">Staff accounts with back-office access.</p>
 
         <div class="flex items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 rounded-md border border-ink-900/15 dark:border-linen-100/15 text-ink-900/40 dark:text-linen-100/40 font-semibold px-4 py-2 text-sm cursor-not-allowed">
+            <span class="inline-flex items-center gap-1.5 rounded-md border border-ink-900/15 dark:border-linen-100/15 text-ink-900/40 dark:text-linen-100/40 font-semibold px-4 py-2 text-sm cursor-not-allowed whitespace-nowrap">
                 Invite <span class="font-mono text-[10px]">(coming soon)</span>
             </span>
 
             <x-forms.button
                 type="button"
                 variant="primary"
+                class="whitespace-nowrap"
                 @click="$dispatch('open-modal', { name: 'create-user' })"
             >
                 Create user
@@ -21,7 +22,7 @@
         @foreach ($users as $user)
             @php $isSelf = $user->id === auth()->id(); @endphp
 
-            <div wire:key="user-{{ $user->id }}" class="rounded-md border border-ink-900/10 dark:border-linen-100/10 bg-white dark:bg-ink-900/40 p-4 flex items-center gap-3">
+            <div wire:key="user-{{ $user->id }}" class="rounded-md border border-ink-900/10 dark:border-linen-100/10 bg-white dark:bg-ink-900/40 p-4 flex flex-wrap items-center gap-3">
                 <span class="w-10 h-10 rounded-full bg-ink-900 dark:bg-copper-500 text-linen-50 dark:text-ink-950 grid place-items-center font-display font-semibold text-sm shrink-0">
                     {{ $user->initials() }}
                 </span>
@@ -39,23 +40,25 @@
                         {{ $user->role }}
                     </span>
                 @else
-                    <select
-                        wire:change="updateRole({{ $user->id }}, $event.target.value)"
-                        class="font-mono text-[10px] rounded-full capitalize shrink-0 border-none bg-ink-900/8 dark:bg-linen-100/10 text-ink-900/70 dark:text-linen-100/70 py-1 pl-2 pr-6 focus:outline-none focus:ring-2 focus:ring-copper-500"
-                    >
-                        <option value="editor" @selected($user->role === 'editor')>editor</option>
-                        <option value="admin" @selected($user->role === 'admin')>admin</option>
-                    </select>
+                    <div class="w-full flex items-center justify-end gap-3 pl-[52px] sm:w-auto sm:pl-0">
+                        <select
+                            wire:change="updateRole({{ $user->id }}, $event.target.value)"
+                            class="font-mono text-[10px] rounded-full capitalize shrink-0 border-none bg-ink-900/8 dark:bg-linen-100/10 text-ink-900/70 dark:text-linen-100/70 py-1 pl-2 pr-6 focus:outline-none focus:ring-2 focus:ring-copper-500"
+                        >
+                            <option value="editor" @selected($user->role === 'editor')>editor</option>
+                            <option value="admin" @selected($user->role === 'admin')>admin</option>
+                        </select>
 
-                    <button
-                        type="button"
-                        wire:click="confirmDelete({{ $user->id }})"
-                        @click="$dispatch('open-modal', { name: 'confirm-delete-user' })"
-                        class="text-danger-500 hover:text-danger-600 shrink-0"
-                        aria-label="Remove {{ $user->name }}"
-                    >
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
+                        <button
+                            type="button"
+                            wire:click="confirmDelete({{ $user->id }})"
+                            @click="$dispatch('open-modal', { name: 'confirm-delete-user' })"
+                            class="text-danger-500 hover:text-danger-600 shrink-0"
+                            aria-label="Remove {{ $user->name }}"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
                 @endif
             </div>
         @endforeach

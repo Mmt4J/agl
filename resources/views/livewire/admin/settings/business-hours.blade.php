@@ -3,39 +3,42 @@
         Drives the "Open now / Closed" badge on the website, checked server-side against Africa/Lagos time.
     </p>
 
-    <form wire:submit="save" class="space-y-3">
-        @foreach ($dayOrder as $day)
-            <div class="rounded-md border border-ink-900/10 dark:border-linen-100/10 p-3">
-                <div class="flex items-center gap-4">
+    <form wire:submit="save" class="space-y-6">
+        <div
+            class="rounded-md border border-ink-900/10 dark:border-linen-100/10 bg-white dark:bg-ink-900/40 divide-y divide-ink-900/10 dark:divide-linen-100/10">
+            @foreach ($dayOrder as $day)
+                <div wire:key="hours-{{ $day }}" class="flex flex-wrap items-center gap-3 px-4 sm:px-5 py-3.5">
                     <p class="w-24 shrink-0 text-sm font-medium">{{ $dayLabels[$day] }}</p>
 
-                    <div class="flex items-center gap-2 flex-1"
-                        @if ($hours[$day]['is_closed']) style="opacity:.4" @endif>
-                        <input type="time" wire:model="hours.{{ $day }}.opens_at" @disabled($hours[$day]['is_closed'])
-                            class="rounded-md border px-2 py-1.5 text-sm bg-white dark:bg-ink-900 border-ink-200 dark:border-ink-700 focus:outline-none focus:ring-2 focus:ring-copper-400" />
-                        <span class="text-ink-900/40 dark:text-linen-100/40">–</span>
-                        <input type="time" wire:model="hours.{{ $day }}.closes_at"
-                            @disabled($hours[$day]['is_closed'])
-                            class="rounded-md border px-2 py-1.5 text-sm bg-white dark:bg-ink-900 border-ink-200 dark:border-ink-700 focus:outline-none focus:ring-2 focus:ring-copper-400" />
-                    </div>
+                    @if ($hours[$day]['is_closed'])
+                        <span class="font-mono text-xs text-ink-900/40 dark:text-linen-100/40">Closed all day</span>
+                    @else
+                        <div class="flex items-center gap-2">
+                            <input type="time" wire:model="hours.{{ $day }}.opens_at"
+                                class="rounded-md border border-ink-900/15 dark:border-linen-100/15 bg-transparent px-2 py-1.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-copper-500" />
+                            <span class="text-ink-900/40 dark:text-linen-100/40">–</span>
+                            <input type="time" wire:model="hours.{{ $day }}.closes_at"
+                                class="rounded-md border border-ink-900/15 dark:border-linen-100/15 bg-transparent px-2 py-1.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-copper-500" />
+                        </div>
+                    @endif
 
-                    <label class="flex items-center gap-2 text-sm shrink-0">
+                    <label class="inline-flex items-center gap-1.5 text-[11px] font-mono ml-auto shrink-0">
                         <input type="checkbox" wire:model.live="hours.{{ $day }}.is_closed"
-                            class="rounded accent-copper-500" />
+                            class="w-3.5 h-3.5 accent-danger-500" />
                         Closed
                     </label>
+
+                    @error("hours.{$day}.opens_at")
+                        <p class="w-full text-xs text-danger-500">{{ $message }}</p>
+                    @enderror
+                    @error("hours.{$day}.closes_at")
+                        <p class="w-full text-xs text-danger-500">{{ $message }}</p>
+                    @enderror
                 </div>
+            @endforeach
+        </div>
 
-                @error("hours.{$day}.opens_at")
-                    <p class="mt-2 text-xs text-danger-500">{{ $message }}</p>
-                @enderror
-                @error("hours.{$day}.closes_at")
-                    <p class="mt-1 text-xs text-danger-500">{{ $message }}</p>
-                @enderror
-            </div>
-        @endforeach
-
-        <div class="flex items-center gap-4 pt-2">
+        <div class="flex items-center gap-4">
             <x-forms.button type="submit" variant="primary">Save</x-forms.button>
 
             @if ($justSaved)
