@@ -81,6 +81,14 @@ class Notifications extends Component
                 'status' => $s->status,
             ]);
 
+        // The three map() calls above can yield an Eloquent\Collection whose
+        // merge() assumes every element is a Model and calls getKey() on it —
+        // which crashes on our plain-array payloads. Normalize to the base
+        // collection before merging so the merge is a plain value append.
+        $quotes = $quotes->toBase();
+        $messages = $messages->toBase();
+        $subscribers = $subscribers->toBase();
+
         $items = $quotes->merge($messages)->merge($subscribers)
             ->sortByDesc('created_at')
             ->values();

@@ -95,3 +95,11 @@ it('survives a corrupted or legacy cache entry', function () {
         ->test(Notifications::class)
         ->assertSee('New quote request from Ada Lovelace');
 });
+
+it('renders without error on an admin page that loads the topbar', function () {
+    QuoteRequest::create(['full_name' => 'Ada Lovelace', 'phone' => '555-0100', 'email' => 'ada@example.com', 'status' => 'new']);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.leads.quote-requests'))
+        ->assertOk();
+});
