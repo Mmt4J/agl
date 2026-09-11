@@ -39,6 +39,16 @@ class RecordMeasurements extends Component
 
     public ?float $armLength = null;
 
+    public ?float $topLength = null;
+
+    public ?float $halfBust = null;
+
+    public ?float $halfLength = null;
+
+    public ?float $roundSleeve = null;
+
+    public ?float $lengthSleeve = null;
+
     // Lower body
     public ?float $hip = null;
 
@@ -48,10 +58,14 @@ class RecordMeasurements extends Component
 
     public ?float $ankle = null;
 
+    public ?float $trouserSkirtLength = null;
+
     // Overall
     public ?float $height = null;
 
     public ?float $weight = null;
+
+    public ?float $gownLength = null;
 
     public string $dressSize = '';
 
@@ -102,12 +116,19 @@ class RecordMeasurements extends Component
             'waist',
             'shoulder',
             'armLength',
+            'topLength',
+            'halfBust',
+            'halfLength',
+            'roundSleeve',
+            'lengthSleeve',
             'hip',
             'inseam',
             'thigh',
             'ankle',
+            'trouserSkirtLength',
             'height',
             'weight',
+            'gownLength',
             'dressSize',
             'notes'
         );
@@ -135,12 +156,19 @@ class RecordMeasurements extends Component
             'waist' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'shoulder' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'armLength' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'topLength' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'halfBust' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'halfLength' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'roundSleeve' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'lengthSleeve' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'hip' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'inseam' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'thigh' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'ankle' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'trouserSkirtLength' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'height' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'weight' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'gownLength' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'dressSize' => ['nullable', 'string', 'max:10'],
             'notes' => ['nullable', 'string'],
         ]);
@@ -156,12 +184,19 @@ class RecordMeasurements extends Component
             'waist' => $validated['waist'],
             'shoulder' => $validated['shoulder'],
             'arm_length' => $validated['armLength'],
+            'top_length' => $validated['topLength'],
+            'half_bust' => $validated['halfBust'],
+            'half_length' => $validated['halfLength'],
+            'round_sleeve' => $validated['roundSleeve'],
+            'length_sleeve' => $validated['lengthSleeve'],
             'hip' => $validated['hip'],
             'inseam' => $validated['inseam'],
             'thigh' => $validated['thigh'],
             'ankle' => $validated['ankle'],
+            'trouser_skirt_length' => $validated['trouserSkirtLength'],
             'height' => $validated['height'],
             'weight' => $validated['weight'],
+            'gown_length' => $validated['gownLength'],
             'dress_size' => $validated['dressSize'] ?: null,
             'notes' => $validated['notes'] ?: null,
         ])->save();
@@ -189,12 +224,19 @@ class RecordMeasurements extends Component
         $this->waist = $record->waist;
         $this->shoulder = $record->shoulder;
         $this->armLength = $record->arm_length;
+        $this->topLength = $record->top_length;
+        $this->halfBust = $record->half_bust;
+        $this->halfLength = $record->half_length;
+        $this->roundSleeve = $record->round_sleeve;
+        $this->lengthSleeve = $record->length_sleeve;
         $this->hip = $record->hip;
         $this->inseam = $record->inseam;
         $this->thigh = $record->thigh;
         $this->ankle = $record->ankle;
+        $this->trouserSkirtLength = $record->trouser_skirt_length;
         $this->height = $record->height;
         $this->weight = $record->weight;
+        $this->gownLength = $record->gown_length;
         $this->dressSize = (string) $record->dress_size;
         $this->notes = (string) $record->notes;
     }

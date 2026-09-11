@@ -26,12 +26,19 @@ it('records a new customer with an auto-assigned unique code', function () {
         ->set('waist', 34)
         ->set('shoulder', 17.5)
         ->set('armLength', 24)
+        ->set('topLength', 26)
+        ->set('halfBust', 20)
+        ->set('halfLength', 24)
+        ->set('roundSleeve', 14)
+        ->set('lengthSleeve', 22)
         ->set('hip', 42)
         ->set('inseam', 30)
         ->set('thigh', 22)
         ->set('ankle', 9.5)
+        ->set('trouserSkirtLength', 36)
         ->set('height', 68)
         ->set('weight', 75)
+        ->set('gownLength', 58)
         ->set('dressSize', 'L')
         ->set('notes', 'Fitting for a native dashiki.')
         ->call('save')
@@ -46,6 +53,12 @@ it('records a new customer with an auto-assigned unique code', function () {
         ->and((float) $record->waist)->toBe(34.0)
         ->and((float) $record->thigh)->toBe(22.0)
         ->and((float) $record->ankle)->toBe(9.5)
+        ->and((float) $record->top_length)->toBe(26.0)
+        ->and((float) $record->half_bust)->toBe(20.0)
+        ->and((float) $record->round_sleeve)->toBe(14.0)
+        ->and((float) $record->length_sleeve)->toBe(22.0)
+        ->and((float) $record->trouser_skirt_length)->toBe(36.0)
+        ->and((float) $record->gown_length)->toBe(58.0)
         ->and($record->dress_size)->toBe('L')
         ->and($record->notes)->toBe('Fitting for a native dashiki.');
 });
@@ -157,6 +170,57 @@ it('deletes a measurement record', function () {
         ->call('deleteConfirmed');
 
     expect(CustomerMeasurement::count())->toBe(0);
+});
+
+it('shows every measurement field on the record page for editing', function () {
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.measurements.record-measurements'))
+        ->assertOk()
+        ->assertSee('Top length')
+        ->assertSee('Half bust')
+        ->assertSee('Half length')
+        ->assertSee('Round sleeve')
+        ->assertSee('Sleeve length')
+        ->assertSee('Trouser / skirt length')
+        ->assertSee('Gown length');
+});
+
+it('hides empty measurement values and sections in the record detail view', function () {
+    $record = CustomerMeasurement::factory()->create([
+        'chest' => 42,
+        'waist' => 34,
+        'shoulder' => null,
+        'arm_length' => null,
+        'top_length' => null,
+        'half_bust' => null,
+        'half_length' => null,
+        'round_sleeve' => null,
+        'length_sleeve' => null,
+        'hip' => null,
+        'inseam' => null,
+        'thigh' => null,
+        'ankle' => null,
+        'trouser_skirt_length' => null,
+        'height' => null,
+        'weight' => null,
+        'gown_length' => null,
+        'dress_size' => null,
+    ]);
+
+    Livewire::actingAs(User::factory()->create())
+        ->test(Records::class)
+        ->call('viewRecord', $record->id)
+        ->assertSee('Upper body')
+        ->assertSee('Chest')
+        ->assertSee('42.0')
+        ->assertSee('Waist')
+        ->assertDontSee('Shoulder')
+        ->assertDontSee('Sleeve length')
+        ->assertDontSee('Lower body')
+        ->assertDontSee('Hip')
+        ->assertDontSee('Overall')
+        ->assertDontSee('Height')
+        ->assertDontSee('Gown length');
 });
 
 it('serves both measurement admin pages over HTTP', function () {
