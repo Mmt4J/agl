@@ -131,12 +131,13 @@ new #[Layout('layouts::website')] #[Title('The Journal')] class extends Componen
             </div>
             <a href="{{ route('website.blog.show', $this->featured) }}" wire:navigate
                 class="group grid lg:grid-cols-2 border border-ink-900/12 dark:border-linen-100/12 bg-white dark:bg-ink-900/40 overflow-hidden">
-                <div
-                    class="min-h-64 lg:min-h-96 bg-ink-900 dark:bg-ink-950 p-8 flex flex-col justify-between text-linen-50">
-                    <span
-                        class="font-mono text-xs text-copper-300">{{ $this->featured->category?->name ?? 'Journal' }}</span>
-                    <span
-                        class="font-display text-7xl text-copper-300/30 group-hover:text-copper-300/50 transition-colors">01</span>
+                <div class="min-h-64 lg:min-h-96 overflow-hidden relative bg-ink-900 dark:bg-ink-950">
+                    @if ($this->featured->imageUrl())
+                        <img src="{{ $this->featured->imageUrl() }}" alt="{{ $this->featured->title }}"
+                            class="w-full h-full min-h-64 lg:min-h-96 object-cover" loading="lazy" />
+                    @else
+                        <x-ui.image-placeholder :title="$this->featured->title" :category-name="$this->featured->category?->name" class="min-h-64 lg:min-h-96" />
+                    @endif
                 </div>
                 <div class="p-7 sm:p-10 flex flex-col justify-center">
                     <p class="font-mono text-[10px] uppercase tracking-widest text-copper-600 dark:text-copper-300">
@@ -186,8 +187,14 @@ new #[Layout('layouts::website')] #[Title('The Journal')] class extends Componen
                 @forelse ($this->posts as $post)
                     <article wire:key="journal-post-{{ $post->id }}"
                         class="group border border-ink-900/12 dark:border-linen-100/12 bg-white dark:bg-ink-900/40 overflow-hidden">
-                        <a href="{{ route('website.blog.show', $post) }}" wire:navigate class="block p-6">
-                            <div class="flex items-center justify-between gap-3 mb-5"><span
+                        <a href="{{ route('website.blog.show', $post) }}" wire:navigate class="block">
+                            @if ($post->imageUrl())
+                                <img src="{{ $post->imageUrl() }}" alt="{{ $post->title }}" class="w-full h-40 object-cover" loading="lazy" />
+                            @else
+                                <x-ui.image-placeholder :title="$post->title" :category-name="$post->category?->name" class="h-40" />
+                            @endif
+                            <div class="p-6">
+                                <div class="flex items-center justify-between gap-3 mb-5"><span
                                     class="font-mono text-[10px] uppercase tracking-widest text-copper-600 dark:text-copper-300">{{ $post->category?->name }}</span><span
                                     class="font-mono text-[10px] text-ink-900/40 dark:text-linen-100/40">{{ $post->read_time_minutes }}
                                     min</span></div>
@@ -201,6 +208,7 @@ new #[Layout('layouts::website')] #[Title('The Journal')] class extends Componen
                                 <span
                                     class="font-mono text-ink-900/50 dark:text-linen-100/50">{{ $post->published_at?->format('M d, Y') }}</span><span
                                     class="font-semibold">Open file -></span>
+                            </div>
                             </div>
                         </a>
                     </article>

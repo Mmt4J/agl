@@ -71,6 +71,14 @@ new #[Layout('layouts::website')] class extends Component {
         </div>
     </section>
 
+    <section class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        @if ($this->post->imageUrl())
+            <img src="{{ $this->post->imageUrl() }}" alt="{{ $this->post->title }}" class="w-full max-h-96 object-cover" loading="lazy">
+        @else
+            <x-ui.image-placeholder :title="$this->post->title" :category-name="$this->post->category?->name" class="h-64 sm:h-80" />
+        @endif
+    </section>
+
     <section class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div class="border-y-2 border-copper-500 py-8 sm:py-10">
             <div class="max-w-none text-lg text-ink-900/80 dark:text-linen-100/80 leading-relaxed whitespace-pre-line">

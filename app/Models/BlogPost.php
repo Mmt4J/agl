@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class BlogPost extends Model
 {
@@ -26,6 +28,19 @@ class BlogPost extends Model
     public function category()
     {
         return $this->belongsTo(BlogCategory::class, 'blog_category_id');
+    }
+
+    public function imageUrl(): ?string
+    {
+        if (blank($this->featured_image)) {
+            return null;
+        }
+
+        // Stored on this codebase's public disk, or an absolute URL/root
+        // path the admin supplied directly.
+        return Str::startsWith($this->featured_image, ['http://', 'https://', '/'])
+            ? $this->featured_image
+            : Storage::disk('public')->url($this->featured_image);
     }
 
     public function author()

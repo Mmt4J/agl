@@ -12,34 +12,52 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 #[Layout('layouts::admin')]
 #[Title('Blog Posts')]
 class Blog extends Component
 {
+    use WithFileUploads;
     use WithPagination;
 
     public ?int $categoryId = null;
+
     public string $categoryName = '';
 
     public ?int $tagId = null;
+
     public string $tagLabel = '';
 
     public ?int $postId = null;
+
     public ?int $blogCategoryId = null;
+
     public string $postTitle = '';
+
     public string $slug = '';
+
     public string $excerpt = '';
+
     public string $body = '';
+
     public string $featuredImage = '';
+
+    public $imageFile = null;
+
     public bool $isFeatured = false;
+
     public int $readTimeMinutes = 5;
+
     public string $status = 'draft';
+
     public string $publishedAt = '';
+
     public array $selectedTagIds = [];
 
     public ?string $confirmingDeleteType = null;
+
     public ?int $confirmingDeleteId = null;
 
     #[Computed]
@@ -98,7 +116,7 @@ class Blog extends Component
     {
         $validated = $this->validate(['categoryName' => ['required', 'string', 'max:255']]);
 
-        $category = $this->categoryId ? BlogCategory::findOrFail($this->categoryId) : new BlogCategory();
+        $category = $this->categoryId ? BlogCategory::findOrFail($this->categoryId) : new BlogCategory;
         $category->name = $validated['categoryName'];
         $category->slug = $category->slug ?: Str::slug($validated['categoryName']);
         $category->save();
@@ -129,7 +147,7 @@ class Blog extends Component
     {
         $validated = $this->validate(['tagLabel' => ['required', 'string', 'max:255']]);
 
-        $tag = $this->tagId ? Tag::findOrFail($this->tagId) : new Tag();
+        $tag = $this->tagId ? Tag::findOrFail($this->tagId) : new Tag;
         $tag->name = $validated['tagLabel'];
         $tag->slug = $tag->slug ?: Str::slug($validated['tagLabel']);
         $tag->save();
@@ -147,6 +165,7 @@ class Blog extends Component
             'postId', 'blogCategoryId', 'postTitle', 'slug', 'excerpt', 'body',
             'featuredImage', 'readTimeMinutes', 'publishedAt', 'selectedTagIds'
         );
+        $this->imageFile = null;
         $this->isFeatured = false;
         $this->status = 'draft';
         $this->readTimeMinutes = 5;
@@ -163,6 +182,7 @@ class Blog extends Component
         $this->excerpt = $post->excerpt;
         $this->body = $post->body;
         $this->featuredImage = $post->featured_image ?? '';
+        $this->imageFile = null;
         $this->isFeatured = $post->is_featured;
         $this->readTimeMinutes = $post->read_time_minutes;
         $this->status = $post->status;
@@ -170,6 +190,19 @@ class Blog extends Component
         $this->selectedTagIds = $post->tags()->pluck('tags.id')->all();
 
         $this->dispatch('open-modal', name: 'post-form');
+    }
+
+    // Strictly one image source: picking a file clears a typed link, and
+    // typing a link clears a picked file.
+    public function updatedImageFile(): void
+    {
+        $this->featuredImage = '';
+    }
+
+    public function updatedFeaturedImage(): void
+    {
+        $this->imageFile = null;
+        $this->resetErrorBag('imageFile');
     }
 
     public function savePost(): void
@@ -180,7 +213,18 @@ class Blog extends Component
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('blog_posts', 'slug')->ignore($this->postId)],
             'excerpt' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string'],
-            'featuredImage' => ['nullable', 'url', 'max:255'],
+            // Either an absolute link, a root-relative path, or a stored upload
+            // path (blog/…). Junk strings and both-fields-at-once are rejected.
+            'featuredImage' => [
+                'nullable', 'string', 'max:255',
+                'regex:/^(https?:\/\/|\/|blog\/)[^\s]+$/',
+                function ($attribute, $value, $fail) {
+                    if (filled($value) && filled($this->imageFile)) {
+                        $fail('Choose either an image file or an image URL, not both.');
+                    }
+                },
+            ],
+            'imageFile' => ['nullable', 'image', 'max:5120'],
             'isFeatured' => ['boolean'],
             'readTimeMinutes' => ['required', 'integer', 'min:1'],
             'status' => ['required', 'in:draft,published'],
@@ -189,10 +233,14 @@ class Blog extends Component
             'selectedTagIds.*' => ['integer', 'exists:tags,id'],
         ]);
 
-        $post = $this->postId ? BlogPost::findOrFail($this->postId) : new BlogPost();
+        $post = $this->postId ? BlogPost::findOrFail($this->postId) : new BlogPost;
 
         $publishedAt = $validated['publishedAt']
             ?: ($validated['status'] === 'published' ? now() : null);
+
+        $featuredImage = $this->imageFile
+            ? $this->imageFile->store('blog', 'public')
+            : ($validated['featuredImage'] !== '' ? $validated['featuredImage'] : null);
 
         $post->fill([
             'blog_category_id' => $validated['blogCategoryId'],
@@ -201,7 +249,7 @@ class Blog extends Component
             'slug' => $validated['slug'] ?: Str::slug($validated['postTitle']),
             'excerpt' => $validated['excerpt'],
             'body' => $validated['body'],
-            'featured_image' => $validated['featuredImage'] ?: null,
+            'featured_image' => $featuredImage,
             'is_featured' => $validated['isFeatured'],
             'read_time_minutes' => $validated['readTimeMinutes'],
             'status' => $validated['status'],
