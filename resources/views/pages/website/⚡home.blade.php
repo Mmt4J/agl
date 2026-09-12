@@ -373,11 +373,11 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                 @foreach ($this->portfolioProjects as $project)
                     <article wire:key="project-{{ $project->id }}"
                         class="rounded-md border border-ink-900/12 dark:border-linen-100/12 overflow-hidden bg-white dark:bg-ink-900/40">
-                        @if ($project->image_path)
-                            <img src="{{ $project->image_path }}" alt="{{ $project->title }}"
+                        @if ($project->imageUrl())
+                            <img src="{{ $project->imageUrl() }}" alt="{{ $project->title }}"
                                 class="w-full h-40 object-cover" loading="lazy" />
                         @else
-                            <div class="w-full h-44 bg-ink-900/5 dark:bg-linen-100/5"></div>
+                            <x-ui.project-image-placeholder :title="$project->title" :category-name="$project->category->name" class="h-44" />
                         @endif
                         <div class="p-5">
                             <span
@@ -394,10 +394,26 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
     @if ($this->testimonials->isNotEmpty())
         <section class="bg-ink-900 dark:bg-ink-950 text-linen-50 border-y border-ink-900/10 dark:border-linen-100/10">
             <div x-data="{
-                items: @js($this->testimonials->values()),
+                items: @js(
+    $this->testimonials
+        ->map(
+            fn($t) => [
+                'id' => $t->id,
+                'quote' => $t->quote,
+                'client_name' => $t->client_name,
+                'client_role' => $t->client_role,
+                'image_url' => $t->imageUrl(),
+            ],
+        )
+        ->values(),
+),
                 active: 0,
                 interval: null,
                 init() {
+                    this.reset();
+                },
+                reset() {
+                    clearInterval(this.interval);
                     this.interval = setInterval(() => {
                         this.active = (this.active + 1) % this.items.length;
                     }, 6000);
@@ -407,23 +423,32 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                 },
             }" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
                 <p class="font-mono text-xs uppercase tracking-widest text-copper-300 mb-6">Statements on file</p>
-                <template x-for="(testimonial, i) in items" :key="testimonial.id">
-                    <div x-show="active === i" x-cloak x-transition.opacity>
-                        <p class="font-display italic text-xl sm:text-2xl leading-relaxed">&ldquo;<span
-                                x-text="testimonial.quote"></span>&rdquo;</p>
-                        <p class="mt-6 font-semibold text-copper-300 font-mono text-sm"
-                            x-text="testimonial.client_name"></p>
-                        <p class="text-sm text-linen-100/60" x-text="testimonial.client_role"></p>
-                    </div>
-                </template>
-
-                <div class="flex justify-center gap-1.5 mt-6">
-                    <template x-for="(testimonial, i) in items" :key="'dot-' + testimonial.id">
-                        <button @click="active = i" class="w-1.5 h-1.5 rounded-full"
-                            :class="active === i ? 'bg-copper-500' : 'bg-ink-900/20 dark:bg-linen-100/20'"
-                            :aria-label="'Show testimonial ' + (i + 1)"></button>
+                <div class="grid grid-cols-1">
+                    <template x-for="(testimonial, i) in items" :key="testimonial.id">
+                        <div x-show="active === i" x-cloak x-transition.opacity
+                            class="col-start-1 row-start-1 flex flex-col items-center justify-center">
+                            <template x-if="testimonial.image_url">
+                                <img :src="testimonial.image_url" :alt="testimonial.client_name"
+                                    class="w-20 h-20 rounded-full object-cover mx-auto mb-6 ring-2 ring-copper-500/40">
+                            </template>
+                            <p class="font-display italic text-xl sm:text-2xl leading-relaxed">&ldquo;<span
+                                    x-text="testimonial.quote"></span>&rdquo;</p>
+                            <p class="mt-6 font-semibold text-copper-300 font-mono text-sm"
+                                x-text="testimonial.client_name"></p>
+                            <p class="text-sm text-linen-100/60" x-text="testimonial.client_role"></p>
+                        </div>
                     </template>
                 </div>
+
+                @if ($this->testimonials->count() > 1)
+                    <div class="flex justify-center gap-1.5 mt-6">
+                        <template x-for="(testimonial, i) in items" :key="'dot-' + testimonial.id">
+                            <button @click="active = i; reset()" class="w-1.5 h-1.5 rounded-full"
+                                :class="active === i ? 'bg-copper-500' : 'bg-ink-900/20 dark:bg-linen-100/20'"
+                                :aria-label="'Show testimonial ' + (i + 1)"></button>
+                        </template>
+                    </div>
+                @endif
             </div>
         </section>
     @endif

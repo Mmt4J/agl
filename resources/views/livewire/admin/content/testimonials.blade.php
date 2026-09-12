@@ -41,6 +41,29 @@
                 <x-forms.input wire:model="clientRole" name="clientRole" label="Role / company" type="text" required />
             </div>
 
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-ink-800 dark:text-linen-100">Client photo</label>
+                <div class="grid grid-cols-2 gap-4 items-start">
+                    <div class="flex flex-col gap-1.5">
+                        <label for="imageFile" class="text-xs text-ink-900/60 dark:text-linen-100/60">Upload image</label>
+                        <input type="file" wire:model="imageFile" id="imageFile" accept="image/*"
+                            class="block w-full text-sm text-ink-900/70 dark:text-linen-100/70 file:mr-3 file:rounded-md file:border-0 file:bg-ink-900/5 dark:file:bg-linen-100/10 file:px-3 file:py-1.5 file:text-sm file:font-medium">
+                        @error('imageFile') <p class="text-xs text-danger-500">{{ $message }}</p> @enderror
+                    </div>
+                    <x-forms.input wire:model="imagePath" name="imagePath" label="…or image URL" type="text" placeholder="https://…" />
+                </div>
+                @if ($imageFile || $imagePath)
+                    <div class="flex items-center gap-3 pt-1">
+                        @if ($imageFile)
+                            <img src="{{ $imageFile->temporaryUrl() }}" alt="Upload preview" class="w-14 h-14 rounded-full object-cover">
+                        @else
+                            <img src="{{ \Illuminate\Support\Str::startsWith($imagePath, ['http://', 'https://', '/']) ? $imagePath : asset('storage/' . $imagePath) }}"
+                                alt="{{ $clientName }}" class="w-14 h-14 rounded-full object-cover">
+                        @endif
+                    </div>
+                @endif
+            </div>
+
             <div class="flex flex-col gap-1.5">
                 <label for="quote" class="text-sm font-medium text-ink-800 dark:text-linen-100">Quote</label>
                 <textarea wire:model="quote" id="quote" rows="3" class="w-full rounded-md border px-3 py-2 text-sm bg-white dark:bg-ink-900 border-ink-200 dark:border-ink-700 focus:outline-none focus:ring-2 focus:ring-copper-400"></textarea>

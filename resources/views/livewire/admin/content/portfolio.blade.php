@@ -91,12 +91,10 @@
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @forelse ($this->projects as $project)
                     <div wire:key="project-{{ $project->id }}" class="rounded-md border border-ink-900/10 dark:border-linen-100/10 overflow-hidden">
-                        @if ($project->image_path)
-                            <img src="{{ $project->image_path }}" alt="{{ $project->title }}" class="w-full h-32 object-cover" loading="lazy" />
+                        @if ($project->imageUrl())
+                            <img src="{{ $project->imageUrl() }}" alt="{{ $project->title }}" class="w-full h-32 object-cover" loading="lazy" />
                         @else
-                            <div class="w-full h-32 bg-ink-900/5 dark:bg-linen-100/5 grid place-items-center">
-                                <span class="font-mono text-[10px] text-ink-900/30 dark:text-linen-100/30">No image</span>
-                            </div>
+                            <x-ui.project-image-placeholder :title="$project->title" :category-name="$project->category->name" class="h-32" />
                         @endif
 
                         <div class="p-3 space-y-1">
@@ -178,7 +176,24 @@
                 <textarea wire:model="body" id="body" rows="6" class="w-full rounded-md border px-3 py-2 text-sm bg-white dark:bg-ink-900 border-ink-200 dark:border-ink-700 focus:outline-none focus:ring-2 focus:ring-copper-400"></textarea>
             </div>
 
-            <x-forms.input wire:model="imagePath" name="imagePath" label="Image URL" type="text" placeholder="https://…" />
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-ink-800 dark:text-linen-100">Project image (optional)</label>
+                <div class="grid grid-cols-2 gap-4 items-start">
+                    <div class="flex flex-col gap-1.5">
+                        <label for="imageFile" class="text-xs text-ink-900/60 dark:text-linen-100/60">Upload image</label>
+                        <input type="file" wire:model="imageFile" id="imageFile" accept="image/*"
+                            class="block w-full text-sm text-ink-900/70 dark:text-linen-100/70 file:mr-3 file:rounded-md file:border-0 file:bg-ink-900/5 dark:file:bg-linen-100/10 file:px-3 file:py-1.5 file:text-sm file:font-medium">
+                        @error('imageFile') <p class="text-xs text-danger-500">{{ $message }}</p> @enderror
+                    </div>
+                    <x-forms.input wire:model="imagePath" name="imagePath" id="imagePath" label="…or image URL" type="text" placeholder="https://…" />
+                </div>
+                @if ($imageFile)
+                    <img src="{{ $imageFile->temporaryUrl() }}" alt="Upload preview" class="w-24 h-16 object-cover rounded-md">
+                @elseif ($imagePath)
+                    <img src="{{ \Illuminate\Support\Str::startsWith($imagePath, ['http://', 'https://', '/']) ? $imagePath : asset('storage/' . $imagePath) }}"
+                        alt="{{ $projectTitle }}" class="w-24 h-16 object-cover rounded-md">
+                @endif
+            </div>
 
             <div class="flex items-center gap-6">
                 <x-forms.input wire:model="projectSortOrder" name="projectSortOrder" label="Sort order" type="number" required class="flex-1" />

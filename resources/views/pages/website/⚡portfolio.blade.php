@@ -27,11 +27,6 @@ new #[Layout('layouts::website')] #[Title('Portfolio')] class extends Component 
     {
         $this->activeCategory = $category;
     }
-
-    public function imageUrl(?string $imagePath): ?string
-    {
-        return $imagePath ? asset('storage/' . $imagePath) : null;
-    }
 };
 ?>
 
@@ -73,16 +68,12 @@ new #[Layout('layouts::website')] #[Title('Portfolio')] class extends Component 
                     <article wire:key="portfolio-project-{{ $project->id }}"
                         class="group rounded-md overflow-hidden border border-ink-900/12 dark:border-linen-100/12 bg-white dark:bg-ink-900/40">
                         <div class="overflow-hidden relative">
-                            @if ($this->imageUrl($project->image_path))
-                                <img src="{{ $this->imageUrl($project->image_path) }}" alt="{{ $project->title }}"
+                            @if ($project->imageUrl())
+                                <img src="{{ $project->imageUrl() }}" alt="{{ $project->title }}"
                                     loading="lazy"
                                     class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
                             @else
-                                <div
-                                    class="w-full h-48 grid place-items-center bg-ink-900 dark:bg-linen-100 text-linen-50 dark:text-ink-950">
-                                    <span
-                                        class="font-display text-xl font-semibold px-4 text-center">{{ $project->title }}</span>
-                                </div>
+                                <x-ui.project-image-placeholder :title="$project->title" :category-name="$project->category->name" class="h-48" />
                             @endif
 
                             <span
