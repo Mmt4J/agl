@@ -94,7 +94,7 @@
                         @if ($project->imageUrl())
                             <img src="{{ $project->imageUrl() }}" alt="{{ $project->title }}" class="w-full h-32 object-cover" loading="lazy" />
                         @else
-                            <x-ui.project-image-placeholder :title="$project->title" :category-name="$project->category->name" class="h-32" />
+                            <x-ui.image-placeholder :title="$project->title" :category-name="$project->category->name" class="h-32" />
                         @endif
 
                         <div class="p-3 space-y-1">

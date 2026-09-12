@@ -73,7 +73,7 @@ new #[Layout('layouts::website')] #[Title('Portfolio')] class extends Component 
                                     loading="lazy"
                                     class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
                             @else
-                                <x-ui.project-image-placeholder :title="$project->title" :category-name="$project->category->name" class="h-48" />
+                                <x-ui.image-placeholder :title="$project->title" :category-name="$project->category->name" class="h-48" />
                             @endif
 
                             <span
