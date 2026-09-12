@@ -63,9 +63,13 @@
                 </button>
             </div>
 
-            <a href="{{ route('website.quote') }}" wire:navigate
+            @php
+                $isAdmin = auth()->user()?->isAdmin() ?? false;
+                $firstName = $isAdmin ? explode(' ', auth()->user()->name)[0] : '';
+            @endphp
+            <a href="{{ $isAdmin ? route('admin.overview') : route('website.quote') }}" wire:navigate
                 class="hidden sm:inline-flex items-center rounded-md bg-copper-500 hover:bg-copper-600 text-ink-950 font-semibold px-4 py-2 text-sm transition-colors">
-                Request a Quote
+                {{ $isAdmin ? $firstName : 'Request a Quote' }}
             </a>
 
             <button @click="mobileOpen = !mobileOpen"
