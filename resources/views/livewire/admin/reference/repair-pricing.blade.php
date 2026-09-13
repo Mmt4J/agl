@@ -53,41 +53,41 @@
         </div>
     </div>
 
-    {{-- The matrix - rows are device types, columns are issue types.
-         Deleting either a device type or issue type above cascades and
-         deletes its cells here automatically (the migration's
-         cascadeOnDelete on both foreign keys), so this table never
-         shows an orphaned price. --}}
+    {{-- Pricing matrix - one card per device type. Adding more issue types
+         can never break the layout: the cells wrap onto new rows instead of
+         widening a table into a horizontal scrollbox, so it reads well on a
+         laptop and on a phone alike. Deleting either a device type or an
+         issue type above still cascades and removes its cells automatically. --}}
     <div class="space-y-3">
-        <h2 class="font-display font-semibold">Pricing matrix</h2>
-        <div class="overflow-x-auto rounded-md border border-ink-900/10 dark:border-linen-100/10">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b border-ink-900/10 dark:border-linen-100/10">
-                        <th class="text-left p-3 font-medium">Device</th>
+        <div class="flex items-center justify-between">
+            <h2 class="font-display font-semibold">Pricing matrix</h2>
+            <p class="text-xs text-ink-900/50 dark:text-linen-100/50 hidden sm:block">Cells wrap as new issues are added — nothing to scroll.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+            @forelse ($deviceTypes as $deviceType)
+                @php $pricedCount = $matrix->get($deviceType->id)?->count() ?? 0; @endphp
+                <div class="rounded-md border border-ink-900/10 dark:border-linen-100/10">
+                    <div class="flex items-center justify-between gap-3 border-b border-ink-900/10 dark:border-linen-100/10 px-4 py-3">
+                        <h3 class="font-medium text-sm">{{ $deviceType->name }}</h3>
+                        <span class="font-mono text-[10px] text-ink-900/40 dark:text-linen-100/40 shrink-0">{{ $pricedCount }} / {{ $issueTypes->count() }} priced</span>
+                    </div>
+                    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2 p-4">
                         @foreach ($issueTypes as $issueType)
-                            <th class="text-left p-3 font-medium whitespace-nowrap">{{ $issueType->name }}</th>
+                            @php $cell = $matrix->get($deviceType->id)?->get($issueType->id); @endphp
+                            <button type="button"
+                                wire:click="editCell({{ $deviceType->id }}, {{ $issueType->id }})"
+                                aria-label="{{ $issueType->name }} for {{ $deviceType->name }}"
+                                class="text-left rounded-md border px-3 py-2.5 transition-colors {{ $cell ? 'border-copper-500/40 bg-copper-500/5 hover:bg-copper-500/10' : 'border-ink-900/10 dark:border-linen-100/10 hover:bg-ink-900/5 dark:hover:bg-linen-100/10' }}">
+                                <span class="block text-[10px] font-mono uppercase tracking-wider text-ink-900/45 dark:text-linen-100/45 truncate">{{ $issueType->name }}</span>
+                                <span class="block text-sm font-medium {{ $cell ? 'text-ink-900 dark:text-linen-100' : 'text-ink-900/25 dark:text-linen-100/25' }}">{{ $cell ? $cell->formatted_range : 'Set price' }}</span>
+                            </button>
                         @endforeach
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($deviceTypes as $deviceType)
-                        <tr class="border-b border-ink-900/5 dark:border-linen-100/5 last:border-0">
-                            <td class="p-3 font-medium whitespace-nowrap">{{ $deviceType->name }}</td>
-                            @foreach ($issueTypes as $issueType)
-                                @php $cell = $matrix->get($deviceType->id)?->get($issueType->id); @endphp
-                                <td class="p-1">
-                                    <button type="button"
-                                        wire:click="editCell({{ $deviceType->id }}, {{ $issueType->id }})"
-                                        class="w-full text-left px-2 py-1.5 rounded hover:bg-ink-900/5 dark:hover:bg-linen-100/10 {{ $cell ? 'text-ink-900 dark:text-linen-100' : 'text-ink-900/30 dark:text-linen-100/30' }}">
-                                        {{ $cell ? $cell->formatted_range : '—' }}
-                                    </button>
-                                </td>
-                            @endforeach
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </div>
+                </div>
+            @empty
+                <p class="text-sm text-ink-900/40 dark:text-linen-100/40">No device types yet — add one above.</p>
+            @endforelse
         </div>
     </div>
 
