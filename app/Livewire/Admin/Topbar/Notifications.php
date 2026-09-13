@@ -29,6 +29,8 @@ class Notifications extends Component
 {
     private const CACHE_PREFIX = 'admin.notifications.last_read.';
 
+    private const SUBSCRIBER_CACHE_PREFIX = 'admin.notifications.last_read.subscribers.';
+
     public string $typeFilter = 'all';
 
     #[Computed]
@@ -66,7 +68,7 @@ class Notifications extends Component
                 'status' => $m->status,
             ]);
 
-        $subscribers = $this->unreadSubscribers($lastRead)
+        $subscribers = $this->unreadSubscribers($this->lastSubscribersReadAt())
             ->latest('subscribed_at')
             ->limit(4)
             ->get(['id', 'email', 'status', 'subscribed_at'])
@@ -109,7 +111,7 @@ class Notifications extends Component
 
         return $this->unreadQuotes($lastRead)->count()
             + $this->unreadMessages($lastRead)->count()
-            + $this->unreadSubscribers($lastRead)->count();
+            + $this->unreadSubscribers($this->lastSubscribersReadAt())->count();
     }
 
     public function filterByType(string $type): void
@@ -123,12 +125,30 @@ class Notifications extends Component
         // date payloads don't survive unserialization across PHP versions and
         // come back as __PHP_Incomplete_Class, which would crash parse() on
         // the next read (the reported live error was exactly that).
-        Cache::forever($this->cacheKey(), now()->toDateTimeString());
+        $now = now()->toDateTimeString();
+
+        Cache::forever($this->cacheKey(), $now);
+        Cache::forever($this->subscriberCacheKey(), $now);
 
         // The action re-renders the component, which immediately drives both
         // the badge (unreadCount) and the tray list (items) back down to
         // empty, since every unread filter compares against the new cutoff.
         $this->dispatch('toast', message: 'Notifications marked as read.');
+    }
+
+    // Opening the newsletter admin page is the "read" action for newsletter
+    // notifications, exactly like marking a message read or updating a
+    // quote's status. Because subscribers have no read/unread state of their
+    // own, viewing the list advances the per-admin subscriber cutoff so the
+    // badge clears. A static so the Newsletter page can trigger it without
+    // instantiating this (island) component.
+    public static function markSubscribersRead(): void
+    {
+        if (! auth()->check()) {
+            return;
+        }
+
+        Cache::forever(self::SUBSCRIBER_CACHE_PREFIX.auth()->id(), now()->toDateTimeString());
     }
 
     private function unreadQuotes(CarbonInterface $lastRead): Builder
@@ -154,7 +174,17 @@ class Notifications extends Component
 
     private function lastReadAt(): CarbonInterface
     {
-        $stored = Cache::get($this->cacheKey());
+        return $this->readCacheValue($this->cacheKey());
+    }
+
+    private function lastSubscribersReadAt(): CarbonInterface
+    {
+        return $this->readCacheValue($this->subscriberCacheKey());
+    }
+
+    private function readCacheValue(string $key): CarbonInterface
+    {
+        $stored = Cache::get($key);
 
         // Only a string is a valid cutoff. Anything else (a legacy date
         // OBJECT written before the string fix — possibly unserialized as
@@ -170,6 +200,11 @@ class Notifications extends Component
     private function cacheKey(): string
     {
         return self::CACHE_PREFIX.auth()->id();
+    }
+
+    private function subscriberCacheKey(): string
+    {
+        return self::SUBSCRIBER_CACHE_PREFIX.auth()->id();
     }
 
     public function render()

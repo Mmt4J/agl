@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Leads;
 
+use App\Livewire\Admin\Topbar\Notifications;
 use App\Models\NewsletterSubscriber;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -17,6 +18,15 @@ class Newsletter extends Component
     use WithPagination;
 
     public ?string $statusFilter = null;
+
+    public function mount(): void
+    {
+        // Opening the subscriber list is the "read" action for newsletter
+        // notifications (mirroring how acting on a quote or marking a message
+        // read drops those types). Advances the per-admin subscriber cutoff so
+        // the topbar badge clears.
+        Notifications::markSubscribersRead();
+    }
 
     #[Computed]
     public function subscribers()
@@ -41,7 +51,7 @@ class Newsletter extends Component
     {
         $statusFilter = $this->statusFilter;
 
-        $filename = 'newsletter-subscribers-' . now()->format('Y-m-d-His') . '.csv';
+        $filename = 'newsletter-subscribers-'.now()->format('Y-m-d-His').'.csv';
 
         return response()->streamDownload(function () use ($statusFilter) {
             $handle = fopen('php://output', 'w');

@@ -103,3 +103,43 @@ it('renders without error on an admin page that loads the topbar', function () {
         ->get(route('admin.leads.quote-requests'))
         ->assertOk();
 });
+
+it('clears subscriber notifications when the newsletter page is opened', function () {
+    $user = User::factory()->create();
+
+    NewsletterSubscriber::create(['email' => 'subscriber@example.com', 'status' => 'subscribed', 'subscribed_at' => now()]);
+
+    $before = Livewire::actingAs($user)->test(Notifications::class);
+    expect($before->get('unreadCount'))->toBe(1);
+
+    $this->actingAs($user)->get(route('admin.leads.newsletter'))->assertOk();
+
+    $after = Livewire::actingAs($user)->test(Notifications::class);
+    expect($after->get('unreadCount'))->toBe(0)
+        ->and($after->get('items'))->toBeEmpty();
+});
+
+it('opening the newsletter page leaves quote and message notifications intact', function () {
+    $user = User::factory()->create();
+
+    QuoteRequest::create(['full_name' => 'Ada Lovelace', 'phone' => '555-0100', 'email' => 'ada@example.com', 'status' => 'new']);
+    ContactMessage::create(['full_name' => 'Grace Hopper', 'email' => 'grace@example.com', 'subject' => 'Hello', 'message' => 'Body.', 'status' => 'unread']);
+    NewsletterSubscriber::create(['email' => 'subscriber@example.com', 'status' => 'subscribed', 'subscribed_at' => now()]);
+
+    $this->actingAs($user)->get(route('admin.leads.newsletter'))->assertOk();
+
+    Livewire::actingAs($user)
+        ->test(Notifications::class)
+        ->assertSee('New quote request from Ada Lovelace')
+        ->assertSee('New message from Grace Hopper')
+        ->assertDontSee('New newsletter subscriber');
+});
+
+it('marking all read also clears subscriber notifications', function () {
+    NewsletterSubscriber::create(['email' => 'subscriber@example.com', 'status' => 'subscribed', 'subscribed_at' => now()]);
+
+    $component = Livewire::actingAs(User::factory()->create())->test(Notifications::class);
+    $component->call('markAllRead');
+
+    expect($component->get('unreadCount'))->toBe(0);
+});
