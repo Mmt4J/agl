@@ -83,6 +83,18 @@ html { font-family: var(--font-body); }
 }
 
 /* ============================================================
+   Admin sidebar active link — toggled by wire:current.exact on
+   the persisted nav. Kept as one unlayered class (instead of
+   data-current: variants) so it deterministically wins over the
+   layered Tailwind utilities with the same specificity.
+   ============================================================ */
+.admin-nav-active {
+    background-color: var(--color-copper-500);
+    color: var(--color-ink-950);
+    font-weight: 600;
+}
+
+/* ============================================================
    Guilloché-style dotted ring behind hero/seal graphics,
    echoing certificate borders
    ============================================================ */

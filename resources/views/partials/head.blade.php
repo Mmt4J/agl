@@ -71,5 +71,36 @@
         applyTheme();
 
         document.addEventListener('livewire:navigated', applyTheme);
+
+        // The persisted admin sidebar keeps its scroll position between page
+        // loads, but when the newly active link sits outside the visible
+        // area (e.g. jumping from a bottom link to a top one, or landing
+        // directly on a deep admin page) it would stay hidden. Nudge the nav
+        // so the current link is always visible. Runs on page load too, since
+        // 'livewire:navigated' also fires then.
+        function keepActiveAdminLinkVisible() {
+            var nav = document.getElementById('admin-sidebar-nav');
+            var active = nav && nav.querySelector('a[data-current], a.admin-nav-active');
+            if (!nav || !active) {
+                return;
+            }
+
+            var navRect = nav.getBoundingClientRect();
+            var activeRect = active.getBoundingClientRect();
+
+            if (activeRect.top >= navRect.top && activeRect.bottom <= navRect.bottom) {
+                return;
+            }
+
+            var target = nav.scrollTop + (activeRect.top - navRect.top) - (nav.clientHeight - active.offsetHeight) / 2;
+
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                nav.scrollTop = target;
+            } else {
+                nav.scrollTo({ top: target, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('livewire:navigated', keepActiveAdminLinkVisible);
     })();
 </script>
