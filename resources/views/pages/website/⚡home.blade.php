@@ -102,7 +102,9 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
                         class="text-copper-500 dark:text-copper-300">Every job on the record.</span>
                 </h1>
                 <p class="mt-6 text-ink-900/70 dark:text-linen-100/70 text-base sm:text-lg max-w-lg leading-relaxed">
-                    ANESMAVISA GLOBAL LTD keeps electronics, software, property, training and design work under one
+                    ANESMAVISA GLOBAL LTD keeps {{ collect($this->services)->pluck('name')->join(', ', ', and ') }}
+                    work under
+                    one
                     CAC-registered, SCUML-compliant name - so nothing you commission is off the books.</p>
                 <div class="mt-8 flex flex-wrap gap-3">
                     <a href="{{ route('website.quote') }}" wire:navigate
@@ -323,15 +325,16 @@ new #[Layout('layouts::website')] #[Title('Home')] class extends Component {
             <div class="order-2 lg:order-1">
                 <p class="font-mono text-xs uppercase tracking-widest text-copper-600 dark:text-copper-300 mb-2">
                     Certificate of record</p>
-                <h2 class="font-display font-semibold text-3xl sm:text-4xl mb-5">A registered partner, not a side
-                    hustle</h2>
-                <p class="text-ink-900/70 dark:text-linen-100/70 leading-relaxed mb-6">Founded by Matthew
-                    and Samuel Alabi, ANESMAVISA GLOBAL LTD was incorporated in March 2026 as a private company
-                    limited by shares and registered with SCUML two months later.
+                <h2 class="font-display font-semibold text-3xl sm:text-4xl mb-5">A registered business, built for trust
+                    and long-term partnerships</h2>
+                <p class="text-ink-900/70 dark:text-linen-100/70 leading-relaxed mb-6">Founded by Matthew and Samuel
+                    Alabi, ANESMAVISA GLOBAL LTD was incorporated in March 2026 as a private company and subsequently
+                    registered with SCUML two months later.
 
                     We bring together essential services that individuals and small businesses would otherwise have to
-                    source from multiple unregistered vendors—providing a more convenient, reliable, and professional
-                    experience in one place.
+                    source from multiple informal or unregistered vendors. By providing these services under one
+                    registered business, we offer our clients a more convenient, reliable, and professional experience,
+                    built on trust, accountability, and long-term partnerships.
                 </p>
                 <dl class="grid grid-cols-2 gap-5">
                     <div class="border-l-2 border-copper-500 pl-3">

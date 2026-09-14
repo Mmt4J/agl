@@ -49,10 +49,11 @@ new #[Layout('layouts::website')] #[Title('About')] class extends Component {
                 <p class="font-mono text-xs uppercase tracking-[0.2em] text-copper-600 dark:text-copper-300 mb-4">
                     Certificate of record</p>
                 <h1 class="font-display font-semibold text-4xl sm:text-5xl lg:text-6xl leading-[1.02]">A registered
-                    partner, not a side hustle.</h1>
+                    company, built for lasting partnerships.</h1>
                 <p class="mt-6 mx-auto text-lg text-ink-900/70 dark:text-linen-100/70 max-w-2xl leading-relaxed">
-                    ANESMAVISA GLOBAL LTD brings practical technology, property, training, repair and design services
-                    under one accountable name.</p>
+                    ANESMAVISA GLOBAL LTD brings practical, reliable solutions together under one trusted and
+                    accountable name.
+                </p>
             </div>
             {{-- <div class="max-w-3xl mx-auto mt-12 pt-8 border-t border-ink-900/15 dark:border-linen-100/15">
                 <p class="font-mono text-[10px] uppercase tracking-widest text-ink-900/50 dark:text-linen-100/50 mb-5">Company register</p>
